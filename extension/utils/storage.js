@@ -68,3 +68,8 @@ async function pruneIfNeeded() {
     await chrome.storage.local.remove(toDelete);
   }
 }
+
+export async function deletePageFromMemory(url) {
+  const key = PAGE_PREFIX + btoa(encodeURIComponent(url)).replace(/[^a-z0-9]/gi, '').slice(0, 40);
+  await chrome.storage.local.remove(key);
+}

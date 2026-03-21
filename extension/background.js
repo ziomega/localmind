@@ -82,6 +82,22 @@ async function handleMessage(message, sender) {
       await chrome.action.setTitle({ title: 'Local Mind — click to see memory results' });
       return { ok: true };
     }
+    case 'CLEAR_MEMORY': {
+        const allData = await chrome.storage.local.get(null);
+        const pageKeys = Object.keys(allData).filter(k => k.startsWith('page_'));
+        await chrome.storage.local.remove(pageKeys);
+        await chrome.storage.session.clear();
+        await chrome.action.setBadgeText({ text: '' });
+        await chrome.action.setTitle({ title: 'Open Local Mind' });
+        return { ok: true };
+    }
+
+    case 'DELETE_PAGE': {
+        const key = 'page_' + btoa(encodeURIComponent(message.url)).replace(/[^a-z0-9]/gi, '').slice(0, 40);
+        await chrome.storage.local.remove(key);
+        return { ok: true };
+        }
+    
 
     case 'PAGE_CONTENT':
       await indexPage(message);
@@ -173,3 +189,4 @@ chrome.runtime.onInstalled.addListener(async () => {
     }
   }
 });
+
