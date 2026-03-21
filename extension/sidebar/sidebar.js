@@ -139,7 +139,7 @@ function createCard(page, delay = 0, highlight = '') {
     ? `<span class="card-score">${Math.round(page.score * 100)}%</span>`
     : '';
 
-card.innerHTML = `
+  card.innerHTML = `
     <div class="card-top">
       <span class="card-title">${highlightKeywords(page.title || domain, highlight)}</span>
       ${scoreHTML}
@@ -150,22 +150,7 @@ card.innerHTML = `
       <span class="card-time">${time}</span>
       ${page.fromHistory ? '<span class="card-tag">history</span>' : ''}
     </div>
-    <button class="card-delete" title="Remove from memory">✕</button>
   `;
-
-  // Delete button — stop link navigation, delete just this card
-  card.querySelector('.card-delete').addEventListener('click', async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await bgMessage({ type: 'DELETE_PAGE', url: page.url });
-    card.style.transition = 'all 0.2s ease';
-    card.style.opacity = '0';
-    card.style.transform = 'translateX(10px)';
-    setTimeout(() => {
-      card.remove();
-      updateIndexCount();
-    }, 200);
-  });
 
   return card;
 }
@@ -276,42 +261,7 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
-// ── Clear all memory ──────────────────────────────────────────────────────────
 
-document.getElementById('clearMemoryBtn').addEventListener('click', () => {
-  const footer = document.querySelector('.status-bar');
-  footer.classList.add('hidden');
-
-  const confirmBar = document.createElement('div');
-  confirmBar.className = 'confirm-bar';
-  confirmBar.innerHTML = `
-    <span>Clear all indexed pages?</span>
-    <div style="display:flex;gap:6px;">
-      <button class="confirm-no" id="confirmNo">Cancel</button>
-      <button class="confirm-yes" id="confirmYes">Clear all</button>
-    </div>
-  `;
-  document.querySelector('.shell').appendChild(confirmBar);
-
-  document.getElementById('confirmNo').addEventListener('click', () => {
-    confirmBar.remove();
-    footer.classList.remove('hidden');
-  });
-
-  document.getElementById('confirmYes').addEventListener('click', async () => {
-    await bgMessage({ type: 'CLEAR_MEMORY' });
-    confirmBar.remove();
-    footer.classList.remove('hidden');
-    timelineList.innerHTML = `
-      <div class="empty-state" style="padding: 24px">
-        <div class="empty-icon">🧠</div>
-        <p class="empty-title">Memory cleared</p>
-        <p class="empty-sub">Browse any page for 8+ seconds and Local Mind will start learning again.</p>
-      </div>`;
-    indexedCount.textContent = '0 pages indexed';
-    showTimeline();
-  });
-});
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 init();
