@@ -18,6 +18,7 @@ app.add_middleware(
 )
 
 OLLAMA_GEN_URL = "http://localhost:11434/api/generate"
+MATCH_LIMIT = 3
 
 IRRELEVANT_PATTERNS = [
     r"\bcookie(s)?\b",
@@ -244,8 +245,9 @@ def query(q: Query):
     try:
         query_vector = get_embedding(q.query)
 
-        candidates = search_memory(query_vector, k=10)
-        results = rerank_results(q.query, candidates, top_k=3)
+        # Retrieve multiple nearest vectors and keep up to top-3 matches.
+        candidates = search_memory(query_vector, k=MATCH_LIMIT)
+        results = rerank_results(q.query, candidates, top_k=MATCH_LIMIT)
 
         if not results:
             return {
@@ -262,7 +264,9 @@ def query(q: Query):
         sources = [
             {
                 "url": r["url"],
-                "title": r.get("title", "Untitled")
+                "title": r.get("title", "Untitled"),
+                "score": r.get("score", 0.0),
+                "semantic_score": r.get("semantic_score", 0.0)
             }
             for r in results
         ]

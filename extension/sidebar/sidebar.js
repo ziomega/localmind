@@ -87,63 +87,76 @@ async function runSearch(query) {
   queryAnswer.classList.add('hidden');
   queryAnswer.textContent = '';
 
-  const response = await fetchQueryResults(query);
-  const results = response?.results || [];
-  const answer = response?.answer || '';
-
-  showSpinner(false);
-
   timelineSection.classList.add('hidden');
   resultsSection.classList.remove('hidden');
   emptyState.classList.add('hidden');
 
-  if (answer) {
-    queryAnswer.textContent = answer;
+  try {
+    // Stage 1: Get local vector search results immediately (up to 3).
+    const localResults = await getLocalVectorResults(query);
+    
+    showSpinner(false);
+    resultsLabel.textContent = `${localResults.length} result${localResults.length !== 1 ? 's' : ''} for "${query}"`;
+
+    if (localResults.length === 0) {
+      resultsList.innerHTML = '';
+      emptyState.classList.remove('hidden');
+      queryAnswer.classList.add('hidden');
+    } else {
+      resultsList.innerHTML = '';
+      localResults.forEach((page, i) => {
+        resultsList.appendChild(createCard(page, i * 40, query));
+      });
+    }
+
+    // Stage 2: Show pending state and fetch AI answer in background.
+    displayPendingAnswer();
+    fetchAIAnswer(query);
+
+  } catch (err) {
+    showSpinner(false);
+    console.error('[LocalMind] Search failed:', err);
+    queryAnswer.textContent = 'Search failed. Try again.';
     queryAnswer.classList.remove('hidden');
   }
-
-  resultsLabel.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for "${query}"`;
-
-  if (results.length === 0) {
-    resultsList.innerHTML = '';
-    if (!answer) emptyState.classList.remove('hidden');
-    return;
-  }
-
-  resultsList.innerHTML = '';
-  results.forEach((page, i) => {
-    resultsList.appendChild(createCard(page, i * 40, query));
-  });
 }
 
-async function fetchQueryResults(query) {
+function displayPendingAnswer() {
+  queryAnswer.innerHTML = '<div class="answer-pending">⏳ Summarizing answer...</div>';
+  queryAnswer.classList.remove('hidden');
+}
+
+async function getLocalVectorResults(query) {
+  const response = await bgMessage({ type: 'SEARCH_QUERY', query });
+  const results = response?.results || [];
+  return results.slice(0, 3);
+}
+
+async function fetchAIAnswer(query) {
   try {
     const res = await fetch('http://127.0.0.1:8000/query', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query }),
+      timeout: 120000,
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const data = await res.json();
-    const now = Date.now();
-    const results = (data?.sources || []).map((source) => ({
-      url: source.url,
-      title: source.title || source.url,
-      text: data?.answer || '',
-      timestamp: now,
-      fromHistory: false,
-      score: Number.isFinite(source?.score) ? source.score : undefined,
-    }));
+    const answer = data?.answer || '';
 
-    return { results, answer: data?.answer || '' };
+    if (answer) {
+      queryAnswer.textContent = answer;
+      queryAnswer.classList.remove('hidden');
+    }
   } catch (err) {
-    console.warn('[LocalMind] /query failed, falling back to SEARCH_QUERY:', err);
-    const fallback = await bgMessage({ type: 'SEARCH_QUERY', query });
-    return { results: fallback?.results || [], answer: '' };
+    console.warn('[LocalMind] AI answer fetch failed:', err);
+    queryAnswer.textContent = 'AI response unavailable.';
   }
 }
+
+
 
 async function refreshSidebarContent() {
   const activeQuery = searchInput.value.trim();
