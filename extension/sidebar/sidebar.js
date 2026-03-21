@@ -340,34 +340,98 @@ document.getElementById('clearMemoryBtn').addEventListener('click', () => {
   const confirmBar = document.createElement('div');
   confirmBar.className = 'confirm-bar';
   confirmBar.innerHTML = `
-    <span>Clear all indexed pages?</span>
-    <div style="display:flex;gap:6px;">
-      <button class="confirm-no" id="confirmNo">Cancel</button>
-      <button class="confirm-yes" id="confirmYes">Clear all</button>
+    <div style="width:100%">
+      <div style="font-size:11px;color:var(--danger);margin-bottom:10px;font-weight:500;">
+        ⚠️ Clear memory
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+        <button class="clear-option-btn" data-range="hour">
+          🕐 Last hour
+        </button>
+        <button class="clear-option-btn" data-range="day">
+          🕰 Last 24 hours
+        </button>
+        <button class="clear-option-btn danger" data-range="all">
+          🗑 All data — cannot be undone
+        </button>
+      </div>
+      <button class="confirm-no" id="confirmNo" style="width:100%">Cancel</button>
     </div>
   `;
+
+  // Inject option button styles
+  const s = document.createElement('style');
+  s.textContent = `
+    .clear-option-btn {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+    .clear-option-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border);
+      color: var(--text-primary);
+    }
+    .clear-option-btn.danger {
+      color: var(--danger);
+      border-color: var(--danger-dim);
+    }
+    .clear-option-btn.danger:hover {
+      background: var(--danger-dim);
+    }
+  `;
+  document.head.appendChild(s);
+
   document.querySelector('.shell').appendChild(confirmBar);
 
+  // Cancel
   document.getElementById('confirmNo').addEventListener('click', () => {
     confirmBar.remove();
     footer.classList.remove('hidden');
   });
 
-  document.getElementById('confirmYes').addEventListener('click', async () => {
-    await bgMessage({ type: 'CLEAR_MEMORY' });
-    confirmBar.remove();
-    footer.classList.remove('hidden');
+  // Option buttons
+  confirmBar.querySelectorAll('.clear-option-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const range = btn.dataset.range;
+      await bgMessage({ type: 'CLEAR_MEMORY', range });
+      confirmBar.remove();
+      footer.classList.remove('hidden');
+
+    const labels = {
+    hour: 'Last hour cleared.',
+    day: 'Last 24 hours cleared.',
+    all: 'All memory cleared.',
+    };
+
+    if (range === 'all') {
+    // Full wipe — show empty state
     timelineList.innerHTML = `
-      <div class="empty-state" style="padding: 24px">
+        <div class="empty-state" style="padding: 24px">
         <div class="empty-icon">🧠</div>
-        <p class="empty-title">Memory cleared</p>
+        <p class="empty-title">${labels[range]}</p>
         <p class="empty-sub">Browse any page for 8+ seconds and Local Mind will start learning again.</p>
-      </div>`;
+        </div>`;
     indexedCount.textContent = '0 pages indexed';
+    } else {
+    // Partial clear — reload timeline with remaining pages
+    showToast(labels[range]);
+    await loadTimeline();
+    await updateIndexCount();
+    }
+
     showTimeline();
+    });
   });
 });
-
 // ── Check for pending query ───────────────────────────────────────────────────
 
 async function checkForPendingQuery() {

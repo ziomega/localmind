@@ -94,17 +94,50 @@ async function handleMessage(message, sender) {
       return { pages: await getRecentPages(message.limit || 20) };
 
     case 'GET_PENDING_QUERY': {
-      const data = await chrome.storage.session.get(['pendingQuery', 'pendingTabId']);
-      if (data.pendingQuery) {
+    const data = await chrome.storage.session.get(['pendingQuery', 'pendingTabId']);
+    if (data.pendingQuery) {
         await chrome.storage.session.remove(['pendingQuery', 'pendingTabId']);
         return { query: data.pendingQuery };
-      }
-      return { query: null };
+    }
+    return { query: null };
+    }
+
+    case 'CLEAR_MEMORY': {
+    const allData = await chrome.storage.local.get(null);
+    const now = Date.now();
+
+    const cutoff = {
+        hour: now - 60 * 60 * 1000,
+        day:  now - 24 * 60 * 60 * 1000,
+        all:  0,
+    }[message.range || 'all'];
+
+    const pageKeys = Object.keys(allData).filter(k => {
+        if (!k.startsWith('page_')) return false;
+        if (message.range === 'all') return true;
+        return (allData[k].timestamp || 0) >= cutoff;
+    });
+
+    await chrome.storage.local.remove(pageKeys);
+
+    if (message.range === 'all') {
+        await chrome.storage.session.clear();
+        await chrome.action.setBadgeText({ text: '' });
+        await chrome.action.setTitle({ title: 'Open Local Mind' });
+    }
+
+    return { ok: true };
+    }
+
+    case 'DELETE_PAGE': {
+    const key = 'page_' + btoa(encodeURIComponent(message.url)).replace(/[^a-z0-9]/gi, '').slice(0, 40);
+    await chrome.storage.local.remove(key);
+    return { ok: true };
     }
 
     default:
-      return { error: 'Unknown message type' };
-  }
+    return { error: 'Unknown message type' };
+    }
 }
 
 // ── Indexing ──────────────────────────────────────────────────────────────────
@@ -138,7 +171,7 @@ async function handleSearch(query) {
 }
 
 function urlToKey(url) {
-  return 'page_' + btoa(encodeURIComponent(url)).replace(/[^a-z0-9]/gi, '').slice(0, 40);
+  return 'page_' + btoa(encodeURIComponent(url))    .replace(/[^a-z0-9]/gi, '').slice(0, 40);
 }
 
 // ── History sync on install ───────────────────────────────────────────────────
