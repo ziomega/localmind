@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Local Mind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="sidebar.css"/>
+</head>
+<body>
+  <div class="shell">
+
+    <header class="header">
+      <div class="logo">
+        <span class="logo-dot"></span>
+        <span class="logo-text">Local<em>Mind</em></span>
+      </div>
+      <div class="header-meta">
+        <span id="indexedCount">— pages</span>
+      </div>
+    </header>
+
+    <div class="search-zone">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input id="searchInput" type="text" placeholder="What did I read about…" autocomplete="off" spellcheck="false"/>
+        <div class="search-spinner" id="searchSpinner"></div>
+      </div>
+      <div class="example-queries" id="exampleQueries">
+        <span class="eq-label">Try:</span>
+        <button class="eq-chip" data-q="machine learning">machine learning</button>
+        <button class="eq-chip" data-q="that recipe I saved">that recipe</button>
+        <button class="eq-chip" data-q="climate change">climate change</button>
+      </div>
+    </div>
+
+    <main class="content-area">
+      <section id="timelineSection">
+        <div class="section-label">
+          <span>Memory Timeline</span>
+          <span class="section-sub">Recent indexed pages</span>
+        </div>
+        <div id="timelineList" class="card-list">
+          <div class="skeleton-list">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="hidden" id="resultsSection">
+        <div class="section-label">
+          <span id="resultsLabel">Results</span>
+          <button class="clear-btn" id="clearSearch">✕ Clear</button>
+        </div>
+        <div id="resultsList" class="card-list"></div>
+      </section>
+
+      <div class="empty-state hidden" id="emptyState">
+        <div class="empty-icon">⌛</div>
+        <p class="empty-title">No memories found</p>
+        <p class="empty-sub">Browse more pages — Local Mind indexes as you read.</p>
+      </div>
+    </main>
+
+    <footer class="status-bar">
+      <div class="status-dot"></div>
+      <span id="statusText">Private · On-device only</span>
+    </footer>
+
+  </div>
+  <script src="sidebar.js"></script>
+</body>
+</html>
