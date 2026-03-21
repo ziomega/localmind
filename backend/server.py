@@ -131,7 +131,7 @@ def condense_content(title: str, content: str, max_chars: int = 1400) -> str:
     return " ".join(out)
 
 
-def rerank_results(query: str, candidates: list, top_k: int = 3) -> list:
+def rerank_results(query: str, candidates: list, top_k: int = 3, min_score: float = 0.10) -> list:
     query_terms = _keyword_set(query)
     if not candidates:
         return []
@@ -158,7 +158,7 @@ def rerank_results(query: str, candidates: list, top_k: int = 3) -> list:
         scored.append(enriched)
 
     scored.sort(key=lambda x: x.get("score", 0.0), reverse=True)
-    return scored[:top_k]
+    return [r for r in scored[:top_k] if r.get("score", 0.0) >= min_score]
 
 # -------- Health Check --------
 @app.get("/test")
@@ -266,7 +266,6 @@ def query(q: Query):
                 "url": r["url"],
                 "title": r.get("title", "Untitled"),
                 "score": r.get("score", 0.0),
-                "semantic_score": r.get("semantic_score", 0.0)
             }
             for r in results
         ]

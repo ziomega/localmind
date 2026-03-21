@@ -12,8 +12,11 @@ const queryAnswer = document.getElementById('queryAnswer');
 const clearBtn = document.getElementById('clearSearch');
 const indexedCount = document.getElementById('indexedCount');
 const exampleQueries = document.getElementById('exampleQueries');
+const sourceFilters = document.getElementById('sourceFilters');
+const sourceFilterButtons = Array.from(document.querySelectorAll('.source-chip'));
 
 let refreshTimeout = null;
+let activeSourceFilter = 'all';
 
 // let searchTimeout = null;
 
@@ -93,7 +96,7 @@ async function runSearch(query) {
 
   try {
     // Stage 1: Get local vector search results immediately (up to 3).
-    const localResults = await getLocalVectorResults(query);
+    const localResults = await getLocalVectorResults(query, activeSourceFilter);
     
     showSpinner(false);
     resultsLabel.textContent = `${localResults.length} result${localResults.length !== 1 ? 's' : ''} for "${query}"`;
@@ -103,10 +106,7 @@ async function runSearch(query) {
       emptyState.classList.remove('hidden');
       queryAnswer.classList.add('hidden');
     } else {
-      resultsList.innerHTML = '';
-      localResults.forEach((page, i) => {
-        resultsList.appendChild(createCard(page, i * 40, query));
-      });
+      renderGroupedResults(localResults, query);
     }
 
     // Stage 2: Show pending state and fetch AI answer in background.
@@ -126,10 +126,10 @@ function displayPendingAnswer() {
   queryAnswer.classList.remove('hidden');
 }
 
-async function getLocalVectorResults(query) {
-  const response = await bgMessage({ type: 'SEARCH_QUERY', query });
+async function getLocalVectorResults(query, sourceFilter = 'all') {
+  const response = await bgMessage({ type: 'SEARCH_QUERY', query, sourceFilter });
   const results = response?.results || [];
-  return results.slice(0, 3);
+  return results.slice(0, 12);
 }
 
 async function fetchAIAnswer(query) {
@@ -183,6 +183,7 @@ function scheduleSidebarRefresh() {
 
 clearBtn.addEventListener('click', () => {
   searchInput.value = '';
+  setSourceFilter('all');
   showTimeline();
 });
 
@@ -205,6 +206,63 @@ document.querySelectorAll('.eq-chip').forEach(btn => {
     runSearch(btn.dataset.q);
   });
 });
+
+sourceFilters?.addEventListener('click', (event) => {
+  const btn = event.target.closest('.source-chip');
+  if (!btn) return;
+  const nextFilter = btn.dataset.filter || 'all';
+  setSourceFilter(nextFilter);
+  const q = searchInput.value.trim();
+  if (q) runSearch(q);
+});
+
+function setSourceFilter(nextFilter) {
+  activeSourceFilter = nextFilter;
+  sourceFilterButtons.forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.filter === nextFilter);
+  });
+}
+
+function classifySource(page) {
+  if (page.sourceType === 'bookmark') return 'bookmarks';
+  if (page.fromHistory) return 'history';
+  return 'visited';
+}
+
+function getGroupLabel(groupKey) {
+  if (groupKey === 'bookmarks') return 'Bookmarks';
+  if (groupKey === 'visited') return 'Visited Pages';
+  if (groupKey === 'history') return 'History';
+  return 'Other';
+}
+
+function renderGroupedResults(results, query) {
+  resultsList.innerHTML = '';
+  const groups = {
+    bookmarks: [],
+    visited: [],
+    history: [],
+  };
+  results.forEach((item) => {
+    const source = classifySource(item);
+    if (!groups[source]) groups[source] = [];
+    groups[source].push(item);
+  });
+
+  let cardIndex = 0;
+  ['bookmarks', 'visited', 'history'].forEach((groupKey) => {
+    const items = groups[groupKey];
+    if (!items?.length) return;
+    const groupWrap = document.createElement('div');
+    groupWrap.className = 'results-group';
+    groupWrap.innerHTML = `<div class="results-group-label">${getGroupLabel(groupKey)}</div>`;
+    items.forEach((page) => {
+      groupWrap.appendChild(createCard(page, cardIndex * 35, query));
+      cardIndex += 1;
+    });
+    resultsList.appendChild(groupWrap);
+  });
+}
 
 // ── Card factory ──────────────────────────────────────────────────────────────
 

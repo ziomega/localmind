@@ -242,6 +242,48 @@ html, body {
   white-space: pre-wrap;
 }
 
+.source-filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.source-chip {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: 16px;
+  font-size: 11px;
+  padding: 4px 9px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.source-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.source-chip.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.results-group {
+  margin-bottom: 12px;
+}
+
+.results-group-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 6px 2px;
+}
+
 .answer-pending {
   display: flex;
   align-items: center;

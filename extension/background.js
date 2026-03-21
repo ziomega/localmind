@@ -91,7 +91,7 @@ async function handleMessage(message, sender) {
       return { ok: true };
 
     case 'SEARCH_QUERY':
-      return { results: await handleSearch(message.query) };
+      return { results: await handleSearch(message.query, message.sourceFilter || 'all') };
 
     case 'GET_RECENT':
       return { pages: await getRecentPages(message.limit || 20) };
@@ -143,10 +143,10 @@ async function indexPage({ url, title, text, timestamp }) {
 
 // ── Search ────────────────────────────────────────────────────────────────────
 
-async function handleSearch(query) {
+async function handleSearch(query, sourceFilter = 'all') {
   if (!query || query.trim().length < 2) return [];
   const queryEmbedding = await generateEmbedding(query);
-  return await searchMemory({ queryEmbedding, queryText: query, topK: 10 });
+  return await searchMemory({ queryEmbedding, queryText: query, topK: 20, sourceFilter });
 }
 
 function urlToKey(url) {

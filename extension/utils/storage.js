@@ -17,12 +17,13 @@ export async function getRecentPages(limit = 20) {
     .slice(0, limit);
 }
 
-export async function searchMemory({ queryEmbedding, queryText, topK = 10 }) {
+export async function searchMemory({ queryEmbedding, queryText, topK = 10, sourceFilter = 'all' }) {
   const all = await chrome.storage.local.get(null);
   const pages = Object.entries(all)
     .filter(([k]) => k.startsWith(PAGE_PREFIX))
     .map(([, v]) => v)
-    .filter(p => p.title || p.text);
+    .filter((p) => (p.title || p.text))
+    .filter((p) => matchesSourceFilter(p, sourceFilter));
 
   const withScores = pages.map(page => {
     let score = 0;
@@ -42,9 +43,17 @@ export async function searchMemory({ queryEmbedding, queryText, topK = 10 }) {
   });
 
   return withScores
-    .filter(p => p.score > 0)
+    .filter(p => p.score >= 0.10)
     .sort((a, b) => b.score - a.score)
     .slice(0, topK);
+}
+
+function matchesSourceFilter(page, sourceFilter) {
+  if (!sourceFilter || sourceFilter === 'all') return true;
+  if (sourceFilter === 'bookmarks') return page.sourceType === 'bookmark';
+  if (sourceFilter === 'history') return !!page.fromHistory;
+  if (sourceFilter === 'visited') return !page.fromHistory && page.sourceType !== 'bookmark';
+  return true;
 }
 
 function cosineSimilarity(a, b) {
