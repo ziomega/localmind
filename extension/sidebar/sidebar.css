@@ -2,10 +2,12 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Dark theme (default) ─────────────────────────────────────────── */
 :root {
   --bg: #0e0e10;
   --bg-card: #17171a;
   --bg-card-hover: #1e1e23;
+  --bg-menu: #1e1e26;
   --border: #2a2a30;
   --border-subtle: #1e1e24;
   --accent: #7c6af7;
@@ -15,22 +17,40 @@
   --text-secondary: #888895;
   --text-muted: #555560;
   --success: #4ade80;
-  --font-serif: 'DM Serif Display', Georgia, serif;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --radius: 10px;
-  --radius-sm: 6px;
-  --sidebar-width: 340px;
+  --danger: #e05252;
+  --danger-dim: rgba(224, 82, 82, 0.12);
+  --shadow-menu: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+/* ── Light theme ──────────────────────────────────────────────────── */
+:root.light {
+  --bg: #f5f4f0;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0efe9;
+  --bg-menu: #ffffff;
+  --border: #e0ddd6;
+  --border-subtle: #ebe8e0;
+  --accent: #6254e8;
+  --accent-dim: rgba(98, 84, 232, 0.1);
+  --accent-glow: rgba(98, 84, 232, 0.2);
+  --text-primary: #1a1a22;
+  --text-secondary: #5a5a6a;
+  --text-muted: #9a9aaa;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --danger-dim: rgba(220, 38, 38, 0.08);
+  --shadow-menu: 0 8px 32px rgba(0,0,0,0.12);
 }
 
 html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text-primary);
-  font-family: var(--font-sans);
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.5;
   overflow: hidden;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .shell {
@@ -40,7 +60,7 @@ html, body {
   width: 100%;
 }
 
-/* ── Header ─────────────────────────────────────────────────────── */
+/* ── Header ───────────────────────────────────────────────────────── */
 
 .header {
   display: flex;
@@ -72,7 +92,7 @@ html, body {
 }
 
 .logo-text {
-  font-family: var(--font-serif);
+  font-family: 'DM Serif Display', Georgia, serif;
   font-size: 18px;
   letter-spacing: -0.3px;
   color: var(--text-primary);
@@ -83,13 +103,43 @@ html, body {
   color: var(--accent);
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .header-meta {
-  font-family: var(--font-mono);
+  font-family: 'DM Mono', monospace;
   font-size: 11px;
   color: var(--text-muted);
 }
 
-/* ── Search Zone ────────────────────────────────────────────────── */
+/* ── Theme toggle ─────────────────────────────────────────────────── */
+
+.theme-toggle {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* ── Search Zone ──────────────────────────────────────────────────── */
 
 .search-zone {
   padding: 14px 16px 10px;
@@ -103,7 +153,7 @@ html, body {
   gap: 8px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 10px;
   padding: 9px 12px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -126,7 +176,7 @@ html, body {
   border: none;
   outline: none;
   color: var(--text-primary);
-  font-family: var(--font-sans);
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 300;
 }
@@ -165,7 +215,7 @@ html, body {
 .eq-label {
   font-size: 11px;
   color: var(--text-muted);
-  font-family: var(--font-mono);
+  font-family: 'DM Mono', monospace;
   flex-shrink: 0;
 }
 
@@ -174,7 +224,7 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 20px;
   color: var(--text-secondary);
-  font-family: var(--font-sans);
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-size: 11px;
   padding: 3px 9px;
   cursor: pointer;
@@ -187,11 +237,12 @@ html, body {
   color: var(--accent);
 }
 
-/* ── Content Area ────────────────────────────────────────────────── */
+/* ── Content Area ─────────────────────────────────────────────────── */
 
 .content-area {
   flex: 1;
   overflow-y: auto;
+  overflow-x: visible;
   padding: 14px 16px;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
@@ -205,7 +256,7 @@ html, body {
 }
 
 .section-label > span:first-child {
-  font-family: var(--font-mono);
+  font-family: 'DM Mono', monospace;
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -216,13 +267,13 @@ html, body {
 .section-sub {
   font-size: 11px;
   color: var(--text-muted);
-  font-family: var(--font-sans);
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-weight: 300;
   letter-spacing: 0 !important;
   text-transform: none !important;
 }
 
-/* ── Cards ──────────────────────────────────────────────────────── */
+/* ── Cards ────────────────────────────────────────────────────────── */
 
 .card-list {
   display: flex;
@@ -230,37 +281,19 @@ html, body {
   gap: 6px;
 }
 
-.query-answer {
-  margin-bottom: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  border: 1px solid var(--accent-glow);
-  background: linear-gradient(180deg, rgba(124, 106, 247, 0.14), rgba(124, 106, 247, 0.06));
-  color: var(--text-primary);
-  font-size: 12px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
-.answer-pending {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  animation: pulse 1.4s ease-in-out infinite;
-}
-
 .memory-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
+  border-radius: 10px;
   padding: 11px 13px;
   cursor: pointer;
   transition: all 0.15s ease;
   animation: fadeSlideIn 0.3s ease both;
   text-decoration: none;
   display: block;
+  position: relative;
+  /* make room for the 3-dot button on the right */
+  padding-right: 36px;
 }
 
 .memory-card:hover {
@@ -292,10 +325,12 @@ html, body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* ensure title never bleeds under the 3-dot btn */
+  min-width: 0;
 }
 
 .card-score {
-  font-family: var(--font-mono);
+  font-family: 'DM Mono', monospace;
   font-size: 10px;
   color: var(--accent);
   background: var(--accent-dim);
@@ -323,7 +358,7 @@ html, body {
 }
 
 .card-domain {
-  font-family: var(--font-mono);
+  font-family: 'DM Mono', monospace;
   font-size: 10px;
   color: var(--text-muted);
 }
@@ -341,17 +376,109 @@ html, body {
   padding: 1px 5px;
 }
 
-/* Skeleton loaders */
+/* ── 3-dot menu button ────────────────────────────────────────────── */
+
+.card-menu-btn {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: all 0.15s;
+  z-index: 2;
+  line-height: 1;
+  padding: 0;
+}
+
+.memory-card:hover .card-menu-btn {
+  opacity: 1;
+}
+
+.card-menu-btn:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+/* ── Dropdown menu ────────────────────────────────────────────────── */
+
+.card-dropdown {
+  position: fixed;
+  background: var(--bg-menu);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-menu);
+  z-index: 99999;
+  overflow: hidden;
+  min-width: 160px;
+  animation: dropIn 0.15s ease both;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.card-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.card-dropdown button:hover {
+  background: var(--bg-card-hover);
+}
+
+.card-dropdown button.danger {
+  color: var(--danger);
+}
+
+.card-dropdown button.danger:hover {
+  background: var(--danger-dim);
+}
+
+.card-dropdown .menu-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.card-dropdown hr {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 2px 0;
+}
+
+/* ── Skeleton loaders ─────────────────────────────────────────────── */
+
 .skeleton-list { display: flex; flex-direction: column; gap: 6px; }
 
 .skeleton-card {
   height: 72px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  animation: shimmer 1.4s ease-in-out infinite;
-  background: linear-gradient(90deg, var(--bg-card) 25%, #1f1f25 50%, var(--bg-card) 75%);
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
   background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 
 @keyframes shimmer {
@@ -359,7 +486,7 @@ html, body {
   100% { background-position: -200% center; }
 }
 
-/* ── Clear button ────────────────────────────────────────────────── */
+/* ── Clear button ─────────────────────────────────────────────────── */
 
 .clear-btn {
   background: transparent;
@@ -367,13 +494,13 @@ html, body {
   color: var(--text-muted);
   font-size: 11px;
   cursor: pointer;
-  font-family: var(--font-sans);
+  font-family: 'DM Sans', system-ui, sans-serif;
   transition: color 0.15s;
 }
 
 .clear-btn:hover { color: var(--text-primary); }
 
-/* ── Empty state ─────────────────────────────────────────────────── */
+/* ── Empty state ──────────────────────────────────────────────────── */
 
 .empty-state {
   display: flex;
@@ -386,10 +513,14 @@ html, body {
 }
 
 .empty-icon { font-size: 32px; opacity: 0.4; }
-.empty-title { font-family: var(--font-serif); font-size: 16px; color: var(--text-secondary); }
+.empty-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
 .empty-sub { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
 
-/* ── Status bar ──────────────────────────────────────────────────── */
+/* ── Status bar ───────────────────────────────────────────────────── */
 
 .status-bar {
   display: flex;
@@ -408,12 +539,85 @@ html, body {
 }
 
 #statusText {
-  font-family: var(--font-mono);
+  font-family: 'DM Mono', monospace;
   font-size: 10px;
   color: var(--text-muted);
 }
 
-/* ── Utilities ───────────────────────────────────────────────────── */
+/* ── Clear memory button ──────────────────────────────────────────── */
+
+.clear-memory-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.clear-memory-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.confirm-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--danger-dim);
+  flex-shrink: 0;
+}
+
+.confirm-bar span {
+  font-size: 11px;
+  color: var(--danger);
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.confirm-yes {
+  background: var(--danger);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 11px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.confirm-no {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── Date groups ──────────────────────────────────────────────────── */
+
+.date-group { margin-bottom: 12px; }
+
+.date-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+
+/* ── Utilities ────────────────────────────────────────────────────── */
 
 .hidden { display: none !important; }
 
@@ -422,4 +626,29 @@ mark {
   color: var(--accent);
   border-radius: 2px;
   padding: 0 1px;
-}   
+}
+
+/* ── Copy toast ───────────────────────────────────────────────────── */
+
+.copy-toast {
+  position: fixed;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--text-primary);
+  color: var(--bg);
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  padding: 6px 14px;
+  border-radius: 20px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  z-index: 9999;
+  white-space: nowrap;
+}
+
+.copy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

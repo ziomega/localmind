@@ -8,23 +8,50 @@ const emptyState = document.getElementById('emptyState');
 const timelineList = document.getElementById('timelineList');
 const resultsList = document.getElementById('resultsList');
 const resultsLabel = document.getElementById('resultsLabel');
-const queryAnswer = document.getElementById('queryAnswer');
 const clearBtn = document.getElementById('clearSearch');
 const indexedCount = document.getElementById('indexedCount');
 const exampleQueries = document.getElementById('exampleQueries');
+const themeToggle = document.getElementById('themeToggle');
+const copyToast = document.getElementById('copyToast');
 
-let refreshTimeout = null;
+let searchTimeout = null;
+let activeDropdown = null;
 
-// let searchTimeout = null;
+// ── Theme ─────────────────────────────────────────────────────────────────────
 
-// ── Init ─────────────────────────────────────────────────────────────────────
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.classList.add('light');
+    themeToggle.textContent = '☀️';
+  } else {
+    document.documentElement.classList.remove('light');
+    themeToggle.textContent = '🌙';
+  }
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('lm-theme') || 'dark';
+  applyTheme(saved);
+}
+
+themeToggle.addEventListener('click', () => {
+  const isLight = document.documentElement.classList.contains('light');
+  const next = isLight ? 'dark' : 'light';
+  localStorage.setItem('lm-theme', next);
+  applyTheme(next);
+  // Notify injected panel to sync theme
+  chrome.storage.session.set({ lmTheme: next });
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
+  initTheme();
   await loadTimeline();
   await updateIndexCount();
 }
 
-// ── Timeline (default view) ───────────────────────────────────────────────────
+// ── Timeline ──────────────────────────────────────────────────────────────────
 
 async function loadTimeline() {
   const response = await bgMessage({ type: 'GET_RECENT', limit: 30 });
@@ -47,136 +74,42 @@ async function loadTimeline() {
     const groupEl = document.createElement('div');
     groupEl.className = 'date-group';
     groupEl.innerHTML = `<div class="date-label">${label}</div>`;
-
-    group.forEach((page, i) => {
-      const card = createCard(page, i * 30);
-      groupEl.appendChild(card);
-    });
-
+    group.forEach((page, i) => groupEl.appendChild(createCard(page, i * 30)));
     timelineList.appendChild(groupEl);
   }
 }
 
 // ── Search ────────────────────────────────────────────────────────────────────
 
-// ── Search ──────────────────────────────────────────────────────────────────
-
 searchInput.addEventListener('input', () => {
-  // Return to timeline as soon as the search box is cleared.
-  if (!searchInput.value.trim()) {
-    showTimeline();
-  }
-});
-
-searchInput.addEventListener('keydown', (event) => {
-  if (event.key !== 'Enter') return;
-  event.preventDefault();
-
+  clearTimeout(searchTimeout);
   const q = searchInput.value.trim();
-  if (!q) {
-    showTimeline();
-    return;
-  }
-
-  runSearch(q);
+  if (!q) { showTimeline(); return; }
+  searchTimeout = setTimeout(() => runSearch(q), 350);
 });
 
 async function runSearch(query) {
   showSpinner(true);
   exampleQueries.classList.add('hidden');
-  queryAnswer.classList.add('hidden');
-  queryAnswer.textContent = '';
 
+  const response = await bgMessage({ type: 'SEARCH_QUERY', query });
+  const results = response?.results || [];
+
+  showSpinner(false);
   timelineSection.classList.add('hidden');
   resultsSection.classList.remove('hidden');
   emptyState.classList.add('hidden');
 
-  try {
-    // Stage 1: Get local vector search results immediately (up to 3).
-    const localResults = await getLocalVectorResults(query);
-    
-    showSpinner(false);
-    resultsLabel.textContent = `${localResults.length} result${localResults.length !== 1 ? 's' : ''} for "${query}"`;
+  resultsLabel.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for "${query}"`;
 
-    if (localResults.length === 0) {
-      resultsList.innerHTML = '';
-      emptyState.classList.remove('hidden');
-      queryAnswer.classList.add('hidden');
-    } else {
-      resultsList.innerHTML = '';
-      localResults.forEach((page, i) => {
-        resultsList.appendChild(createCard(page, i * 40, query));
-      });
-    }
-
-    // Stage 2: Show pending state and fetch AI answer in background.
-    displayPendingAnswer();
-    fetchAIAnswer(query);
-
-  } catch (err) {
-    showSpinner(false);
-    console.error('[LocalMind] Search failed:', err);
-    queryAnswer.textContent = 'Search failed. Try again.';
-    queryAnswer.classList.remove('hidden');
+  if (results.length === 0) {
+    resultsList.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
   }
-}
 
-function displayPendingAnswer() {
-  queryAnswer.innerHTML = '<div class="answer-pending">⏳ Summarizing answer...</div>';
-  queryAnswer.classList.remove('hidden');
-}
-
-async function getLocalVectorResults(query) {
-  const response = await bgMessage({ type: 'SEARCH_QUERY', query });
-  const results = response?.results || [];
-  return results.slice(0, 3);
-}
-
-async function fetchAIAnswer(query) {
-  try {
-    const res = await fetch('http://127.0.0.1:8000/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
-      timeout: 120000,
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const data = await res.json();
-    const answer = data?.answer || '';
-
-    if (answer) {
-      queryAnswer.textContent = answer;
-      queryAnswer.classList.remove('hidden');
-    }
-  } catch (err) {
-    console.warn('[LocalMind] AI answer fetch failed:', err);
-    queryAnswer.textContent = 'AI response unavailable.';
-  }
-}
-
-
-
-async function refreshSidebarContent() {
-  const activeQuery = searchInput.value.trim();
-  if (activeQuery) {
-    await runSearch(activeQuery);
-  } else {
-    await loadTimeline();
-    showTimeline();
-  }
-  await updateIndexCount();
-}
-
-function scheduleSidebarRefresh() {
-  if (refreshTimeout) clearTimeout(refreshTimeout);
-  // Batch rapid storage writes into one UI refresh.
-  refreshTimeout = setTimeout(() => {
-    refreshSidebarContent().catch((err) => {
-      console.warn('[LocalMind] Failed to refresh sidebar:', err);
-    });
-  }, 120);
+  resultsList.innerHTML = '';
+  results.forEach((page, i) => resultsList.appendChild(createCard(page, i * 40, query)));
 }
 
 // ── Clear search ──────────────────────────────────────────────────────────────
@@ -191,12 +124,10 @@ function showTimeline() {
   resultsSection.classList.add('hidden');
   emptyState.classList.add('hidden');
   exampleQueries.classList.remove('hidden');
-  queryAnswer.classList.add('hidden');
-  queryAnswer.textContent = '';
   showSpinner(false);
 }
 
-// ── Example query chips ───────────────────────────────────────────────────────
+// ── Example chips ─────────────────────────────────────────────────────────────
 
 document.querySelectorAll('.eq-chip').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -236,9 +167,90 @@ function createCard(page, delay = 0, highlight = '') {
       <span class="card-time">${time}</span>
       ${page.fromHistory ? '<span class="card-tag">history</span>' : ''}
     </div>
+    <button class="card-menu-btn" title="Options">⋯</button>
   `;
 
+  // ── 3-dot menu ──────────────────────────────────────────────────────────────
+  const menuBtn = card.querySelector('.card-menu-btn');
+
+  menuBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeActiveDropdown();
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'card-dropdown';
+    dropdown.innerHTML = `
+      <button class="copy-url-btn">
+        <span class="menu-icon">🔗</span> Copy URL
+      </button>
+      <button class="copy-title-btn">
+        <span class="menu-icon">📋</span> Copy title
+      </button>
+      <hr/>
+      <button class="delete-btn danger">
+        <span class="menu-icon">🗑</span> Remove from memory
+      </button>
+    `;
+
+    // Position dropdown using fixed coords relative to the button
+    const btnRect = menuBtn.getBoundingClientRect();
+    dropdown.style.top = `${btnRect.bottom + 4}px`;
+    dropdown.style.right = `${window.innerWidth - btnRect.right}px`;
+
+    document.body.appendChild(dropdown);
+    activeDropdown = dropdown;
+
+    // Copy URL
+    dropdown.querySelector('.copy-url-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      navigator.clipboard.writeText(page.url);
+      showToast('URL copied!');
+      closeActiveDropdown();
+    });
+
+    // Copy title
+    dropdown.querySelector('.copy-title-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      navigator.clipboard.writeText(page.title || domain);
+      showToast('Title copied!');
+      closeActiveDropdown();
+    });
+
+    // Delete
+    dropdown.querySelector('.delete-btn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeActiveDropdown();
+      await bgMessage({ type: 'DELETE_PAGE', url: page.url });
+      card.style.transition = 'all 0.2s ease';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(10px)';
+      setTimeout(() => { card.remove(); updateIndexCount(); }, 200);
+    });
+  });
+
   return card;
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', () => closeActiveDropdown());
+
+function closeActiveDropdown() {
+  if (activeDropdown) {
+    activeDropdown.remove();
+    activeDropdown = null;
+  }
+}
+
+// ── Copy toast ────────────────────────────────────────────────────────────────
+
+function showToast(msg = 'Copied!') {
+  copyToast.textContent = msg;
+  copyToast.classList.add('show');
+  setTimeout(() => copyToast.classList.remove('show'), 1800);
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
@@ -278,12 +290,10 @@ function groupByDate(pages) {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-
     let label;
     if (isSameDay(d, today)) label = 'Today';
     else if (isSameDay(d, yesterday)) label = 'Yesterday';
     else label = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-
     if (!groups[label]) groups[label] = [];
     groups[label].push(page);
   });
@@ -321,16 +331,44 @@ function bgMessage(payload) {
   });
 }
 
-// ── Auto-refresh when new pages are indexed ──────────────────────────────────
+// ── Clear all memory ──────────────────────────────────────────────────────────
 
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName !== 'local') return;
-  const hasPageUpdate = Object.keys(changes).some((key) => key.startsWith('page_'));
-  if (!hasPageUpdate) return;
-  scheduleSidebarRefresh();
+document.getElementById('clearMemoryBtn').addEventListener('click', () => {
+  const footer = document.querySelector('.status-bar');
+  footer.classList.add('hidden');
+
+  const confirmBar = document.createElement('div');
+  confirmBar.className = 'confirm-bar';
+  confirmBar.innerHTML = `
+    <span>Clear all indexed pages?</span>
+    <div style="display:flex;gap:6px;">
+      <button class="confirm-no" id="confirmNo">Cancel</button>
+      <button class="confirm-yes" id="confirmYes">Clear all</button>
+    </div>
+  `;
+  document.querySelector('.shell').appendChild(confirmBar);
+
+  document.getElementById('confirmNo').addEventListener('click', () => {
+    confirmBar.remove();
+    footer.classList.remove('hidden');
+  });
+
+  document.getElementById('confirmYes').addEventListener('click', async () => {
+    await bgMessage({ type: 'CLEAR_MEMORY' });
+    confirmBar.remove();
+    footer.classList.remove('hidden');
+    timelineList.innerHTML = `
+      <div class="empty-state" style="padding: 24px">
+        <div class="empty-icon">🧠</div>
+        <p class="empty-title">Memory cleared</p>
+        <p class="empty-sub">Browse any page for 8+ seconds and Local Mind will start learning again.</p>
+      </div>`;
+    indexedCount.textContent = '0 pages indexed';
+    showTimeline();
+  });
 });
 
-// ── Check for pending query (triggered by browser search) ────────────────────
+// ── Check for pending query ───────────────────────────────────────────────────
 
 async function checkForPendingQuery() {
   const response = await bgMessage({ type: 'GET_PENDING_QUERY' });
@@ -340,22 +378,19 @@ async function checkForPendingQuery() {
   }
 }
 
-// ── Date group label styles ───────────────────────────────────────────────────
+// ── Auto-refresh on new browser search ───────────────────────────────────────
 
-const style = document.createElement('style');
-style.textContent = `
-  .date-group { margin-bottom: 12px; }
-  .date-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-    padding-left: 2px;
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'session') return;
+  if (changes.pendingQuery?.newValue) {
+    searchInput.value = changes.pendingQuery.newValue;
+    runSearch(changes.pendingQuery.newValue);
   }
-`;
-document.head.appendChild(style);
+  // Sync theme from sidebar to mini panel
+  if (changes.lmTheme?.newValue) {
+    applyTheme(changes.lmTheme.newValue);
+  }
+});
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
