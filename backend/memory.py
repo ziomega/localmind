@@ -39,19 +39,25 @@ def add_memory(vector, data):
     metadata.append(data)
     save()
 
-def search_memory(query_vector, k=3):
+def search_memory(query_vector, k=3, min_similarity=0.10):
+    if index.ntotal == 0:
+        return []
+
     vec = np.array([query_vector], dtype="float32")
     vec = _normalize_rows(vec)
     D, I = index.search(vec, k)
 
     results = []
     for distance, i in zip(D[0], I[0]):
-        if i < len(metadata):
-            item = dict(metadata[i])
-            item["distance"] = float(distance)
-            # Higher is better; monotonically mapped from L2 distance.
-            item["semantic_score"] = float(1.0 / (1.0 + max(float(distance), 0.0)))
-            results.append(item)
+        if i < 0 or i >= len(metadata):
+            continue
+        # For normalized vectors: cosine_similarity = 1 - (L2^2 / 2)
+        cosine_sim = float(1.0 - (max(float(distance), 0.0) / 2.0))
+        if cosine_sim < min_similarity:
+            continue
+        item = dict(metadata[i])
+        item["score"] = round(cosine_sim, 4)
+        results.append(item)
     return results
 
 

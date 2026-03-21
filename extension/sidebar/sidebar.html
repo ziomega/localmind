@@ -16,8 +16,9 @@
         <span class="logo-dot"></span>
         <span class="logo-text">Local<em>Mind</em></span>
       </div>
-      <div class="header-meta">
-        <span id="indexedCount">— pages</span>
+      <div class="header-right">
+        <span class="header-meta" id="indexedCount">— pages</span>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">🌙</button>
       </div>
     </header>
 
@@ -57,6 +58,12 @@
           <span id="resultsLabel">Results</span>
           <button class="clear-btn" id="clearSearch">✕ Clear</button>
         </div>
+        <div class="source-filters" id="sourceFilters">
+          <button class="source-chip active" data-filter="all">All</button>
+          <button class="source-chip" data-filter="bookmarks">Bookmarks</button>
+          <button class="source-chip" data-filter="visited">Visited Pages</button>
+          <button class="source-chip" data-filter="history">History</button>
+        </div>
         <div class="query-answer hidden" id="queryAnswer"></div>
         <div id="resultsList" class="card-list"></div>
       </section>
@@ -71,9 +78,14 @@
     <footer class="status-bar">
       <div class="status-dot"></div>
       <span id="statusText">Private · On-device only</span>
+      <button class="clear-memory-btn" id="clearMemoryBtn">Clear all</button>
     </footer>
 
   </div>
+
+  <!-- Copy toast -->
+  <div class="copy-toast" id="copyToast">Copied!</div>
+
   <script src="sidebar.js"></script>
 </body>
 </html>

@@ -75,3 +75,16 @@ function highlight(text, query) {
   });
   return result;
 }
+
+// ── Sync theme with sidebar ───────────────────────────────────────
+chrome.storage.session.get('lmTheme', (data) => {
+  if (data.lmTheme === 'light') {
+    document.documentElement.classList.add('light');
+  }
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'session' && changes.lmTheme) {
+    document.documentElement.classList.toggle('light', changes.lmTheme.newValue === 'light');
+  }
+});
