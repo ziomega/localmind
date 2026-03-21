@@ -1,7 +1,7 @@
 // Injected into every page. Extracts meaningful text after user dwells.
 
-const DWELL_TIME_MS = 8000;
-const MAX_TEXT_LENGTH = 5000;
+const DWELL_TIME_MS = 1000;
+const MAX_TEXT_LENGTH = 20000;
 
 let dwellTimer = null;
 let hasExtracted = false;

@@ -230,6 +230,18 @@ html, body {
   gap: 6px;
 }
 
+.query-answer {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent-glow);
+  background: linear-gradient(180deg, rgba(124, 106, 247, 0.14), rgba(124, 106, 247, 0.06));
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
 .memory-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);

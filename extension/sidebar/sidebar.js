@@ -8,11 +8,14 @@ const emptyState = document.getElementById('emptyState');
 const timelineList = document.getElementById('timelineList');
 const resultsList = document.getElementById('resultsList');
 const resultsLabel = document.getElementById('resultsLabel');
+const queryAnswer = document.getElementById('queryAnswer');
 const clearBtn = document.getElementById('clearSearch');
 const indexedCount = document.getElementById('indexedCount');
 const exampleQueries = document.getElementById('exampleQueries');
 
-let searchTimeout = null;
+let refreshTimeout = null;
+
+// let searchTimeout = null;
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
@@ -56,24 +59,37 @@ async function loadTimeline() {
 
 // ── Search ────────────────────────────────────────────────────────────────────
 
-searchInput.addEventListener('input', () => {
-  clearTimeout(searchTimeout);
-  const q = searchInput.value.trim();
+// ── Search ──────────────────────────────────────────────────────────────────
 
+searchInput.addEventListener('input', () => {
+  // Return to timeline as soon as the search box is cleared.
+  if (!searchInput.value.trim()) {
+    showTimeline();
+  }
+});
+
+searchInput.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter') return;
+  event.preventDefault();
+
+  const q = searchInput.value.trim();
   if (!q) {
     showTimeline();
     return;
   }
 
-  searchTimeout = setTimeout(() => runSearch(q), 350);
+  runSearch(q);
 });
 
 async function runSearch(query) {
   showSpinner(true);
   exampleQueries.classList.add('hidden');
+  queryAnswer.classList.add('hidden');
+  queryAnswer.textContent = '';
 
-  const response = await bgMessage({ type: 'SEARCH_QUERY', query });
+  const response = await fetchQueryResults(query);
   const results = response?.results || [];
+  const answer = response?.answer || '';
 
   showSpinner(false);
 
@@ -81,11 +97,16 @@ async function runSearch(query) {
   resultsSection.classList.remove('hidden');
   emptyState.classList.add('hidden');
 
+  if (answer) {
+    queryAnswer.textContent = answer;
+    queryAnswer.classList.remove('hidden');
+  }
+
   resultsLabel.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} for "${query}"`;
 
   if (results.length === 0) {
     resultsList.innerHTML = '';
-    emptyState.classList.remove('hidden');
+    if (!answer) emptyState.classList.remove('hidden');
     return;
   }
 
@@ -93,6 +114,56 @@ async function runSearch(query) {
   results.forEach((page, i) => {
     resultsList.appendChild(createCard(page, i * 40, query));
   });
+}
+
+async function fetchQueryResults(query) {
+  try {
+    const res = await fetch('http://127.0.0.1:8000/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    const now = Date.now();
+    const results = (data?.sources || []).map((source) => ({
+      url: source.url,
+      title: source.title || source.url,
+      text: data?.answer || '',
+      timestamp: now,
+      fromHistory: false,
+      score: Number.isFinite(source?.score) ? source.score : undefined,
+    }));
+
+    return { results, answer: data?.answer || '' };
+  } catch (err) {
+    console.warn('[LocalMind] /query failed, falling back to SEARCH_QUERY:', err);
+    const fallback = await bgMessage({ type: 'SEARCH_QUERY', query });
+    return { results: fallback?.results || [], answer: '' };
+  }
+}
+
+async function refreshSidebarContent() {
+  const activeQuery = searchInput.value.trim();
+  if (activeQuery) {
+    await runSearch(activeQuery);
+  } else {
+    await loadTimeline();
+    showTimeline();
+  }
+  await updateIndexCount();
+}
+
+function scheduleSidebarRefresh() {
+  if (refreshTimeout) clearTimeout(refreshTimeout);
+  // Batch rapid storage writes into one UI refresh.
+  refreshTimeout = setTimeout(() => {
+    refreshSidebarContent().catch((err) => {
+      console.warn('[LocalMind] Failed to refresh sidebar:', err);
+    });
+  }, 120);
 }
 
 // ── Clear search ──────────────────────────────────────────────────────────────
@@ -107,6 +178,8 @@ function showTimeline() {
   resultsSection.classList.add('hidden');
   emptyState.classList.add('hidden');
   exampleQueries.classList.remove('hidden');
+  queryAnswer.classList.add('hidden');
+  queryAnswer.textContent = '';
   showSpinner(false);
 }
 
@@ -234,6 +307,15 @@ function bgMessage(payload) {
     });
   });
 }
+
+// ── Auto-refresh when new pages are indexed ──────────────────────────────────
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local') return;
+  const hasPageUpdate = Object.keys(changes).some((key) => key.startsWith('page_'));
+  if (!hasPageUpdate) return;
+  scheduleSidebarRefresh();
+});
 
 // ── Check for pending query (triggered by browser search) ────────────────────
 

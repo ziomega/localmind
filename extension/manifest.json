@@ -5,7 +5,6 @@
   "description": "Your private, agentic browser memory layer.",
 
   "permissions": [
-    "history",
     "bookmarks",
     "activeTab",
     "storage",
