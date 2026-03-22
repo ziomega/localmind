@@ -530,7 +530,166 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    /* ── Installation Guide ────────────────────────────────────────────── */
 
+.install-steps {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+}
+
+.install-step {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(124,106,247,0.2);
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.install-connector {
+  width: 1px;
+  height: 32px;
+  background: var(--border2);
+  margin-left: 22px;
+}
+
+.step-content {
+  padding-bottom: 8px;
+}
+
+.step-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+
+.step-desc {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.65;
+  margin-bottom: 12px;
+  max-width: 520px;
+}
+
+.step-tip {
+  font-size: 13px;
+  color: var(--text3);
+  margin-top: 8px;
+}
+
+.step-tip strong {
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.step-code {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  max-width: 420px;
+}
+
+.code-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.step-code code {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent2);
+}
+
+.step-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(124,106,247,0.3);
+  border-radius: 8px;
+  color: var(--accent2);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 10px 18px;
+  text-decoration: none;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+
+.step-btn:hover {
+  background: rgba(124,106,247,0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.step-visual {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.mock-chrome-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  font-family: var(--sans);
+  cursor: default;
+}
+
+.step-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 18px;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.2);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--green);
+  font-family: var(--mono);
+}
+
+.done-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
     @media (max-width: 768px) {
       nav { padding: 16px 24px; }
       .nav-links { display: none; }
@@ -551,6 +710,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="#how">How it works</a></li>
+      <li><a href="#install">Install</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#privacy">Privacy</a></li>
       <li><a href="https://github.com/ziomega/localmind/releases/download/v1.0.0-beta/local-mind-extension.zip" class="nav-cta" target="_blank">Download for Chrome</a></li>
@@ -615,6 +775,95 @@
           <div class="how-title">Ask in plain English</div>
           <p class="how-desc">Search your memory the way you actually think. "that article about startup pricing" or "the recipe with tahini" — and it finds it, ranked by how relevant it actually is.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+<div class="divider"></div>
+
+  <!-- Installation Guide -->
+  <section id="install">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Get started</div>
+        <h2 class="section-title">Up and running in <em>under a minute.</em></h2>
+        <p class="section-body">No account. No setup wizard. Just download, load, and browse.</p>
+      </div>
+
+      <div class="install-steps reveal">
+
+        <div class="install-step">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <div class="step-title">Download the extension</div>
+            <p class="step-desc">Click the button below to download the latest release as a zip file.</p>
+            <a href="REPLACE_WITH_GITHUB_RELEASE_LINK" class="step-btn" target="_blank" download>
+              ↓ Download local-mind-extension.zip
+            </a>
+          </div>
+        </div>
+
+        <div class="install-connector"></div>
+
+        <div class="install-step">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <div class="step-title">Unzip the file</div>
+            <p class="step-desc">Extract the downloaded zip anywhere on your computer — your Desktop works fine.</p>
+            <div class="step-code">
+              <span class="code-label">Windows</span>
+              <code>Right-click the zip → Extract All</code>
+            </div>
+            <div class="step-code">
+              <span class="code-label">Mac</span>
+              <code>Double-click the zip file</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="install-connector"></div>
+
+        <div class="install-step">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <div class="step-title">Open Chrome extensions</div>
+            <p class="step-desc">In Chrome, go to the extensions page and turn on Developer Mode.</p>
+            <div class="step-code">
+              <span class="code-label">Chrome address bar</span>
+              <code>chrome://extensions</code>
+            </div>
+            <p class="step-tip">Then toggle <strong>Developer Mode</strong> in the top-right corner.</p>
+          </div>
+        </div>
+
+        <div class="install-connector"></div>
+
+        <div class="install-step">
+          <div class="step-num">04</div>
+          <div class="step-content">
+            <div class="step-title">Load the extension</div>
+            <p class="step-desc">Click <strong>Load unpacked</strong> and select the unzipped folder.</p>
+            <div class="step-visual">
+              <div class="mock-chrome-btn">Load unpacked</div>
+              <span style="color:var(--text3);font-size:13px;">← click this, then select the folder</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="install-connector"></div>
+
+        <div class="install-step">
+          <div class="step-num">05</div>
+          <div class="step-content">
+            <div class="step-title">Pin it and start browsing</div>
+            <p class="step-desc">Click the puzzle piece 🧩 icon in your toolbar, find Local Mind, and pin it. Then just browse — Local Mind starts learning immediately.</p>
+            <div class="step-done">
+              <span class="done-dot"></span>
+              You're all set. No sign-up required.
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
