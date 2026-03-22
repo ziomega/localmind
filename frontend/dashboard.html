@@ -907,6 +907,33 @@
 			}
 		}
 
+		function consumeChatFromUrl() {
+			let chat;
+			try {
+				chat = new URLSearchParams(window.location.search).get('chat');
+			} catch (_) {
+				return;
+			}
+			const message = (chat || '').trim();
+			if (!message) return;
+			try {
+				const u = new URL(window.location.href);
+				u.searchParams.delete('chat');
+				const next = u.pathname + (u.search || '') + (u.hash || '');
+				window.history.replaceState({}, '', next);
+			} catch (_) {
+				/* ignore */
+			}
+			if (els.chatWindow) {
+				els.chatWindow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			}
+			els.chatInput.value = message;
+			requestAnimationFrame(() => {
+				els.chatInput.focus();
+				els.chatInput.setSelectionRange(message.length, message.length);
+			});
+		}
+
 		function toSearchBlob(r) {
 			return `${r.title || ''} ${r.domain || ''} ${r.url || ''} ${r.snippet || ''}`.toLowerCase();
 		}
@@ -981,8 +1008,12 @@
 			}
 		}
 
-		applyTheme(getInitialTheme());
-		loadAnalytics();
+		async function initDashboard() {
+			applyTheme(getInitialTheme());
+			await loadAnalytics();
+			consumeChatFromUrl();
+		}
+		initDashboard();
 	</script>
 </body>
 </html>

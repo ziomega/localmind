@@ -515,6 +515,7 @@ def _is_metadata_query(message: str) -> bool:
     probes = [
         "when", "date", "visited", "visit", "time", "spent", "how long",
         "last", "first", "timeline", "history", "day", "today", "yesterday",
+        "where did", "where can", "list link", "links to", "show link",
     ]
     return any(p in m for p in probes)
 
@@ -692,6 +693,7 @@ Answer the user based only on the browsing history context below.
 If the answer is weak/partial, say what is missing and suggest a better follow-up query.
 When possible, include timeline cues (today/yesterday/date) from the provided context.
 If asked about date visited, when, or time spent, include explicit fields like Visited and Time Spent from matching records.
+If the user asks where they read something, which page or site it was on, or to list, show, or give links or URLs, include the URL (and title/domain) from the context for each top matching record — do not omit links for those questions.
 If multiple records match, rank the top 2-4 and state the most likely match first.
 
 Browsing History Context:

@@ -135,6 +135,14 @@ searchInput.addEventListener('input', () => {
   searchTimeout = setTimeout(() => runSearch(q), 350);
 });
 
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || e.isComposing) return;
+  const q = searchInput.value.trim();
+  if (!q || !shouldRouteToMikeRoss(q)) return;
+  e.preventDefault();
+  openDashboardWithChatQuery(q);
+});
+
 async function runSearch(query) {
   showSpinner(true);
   exampleQueries.classList.add('hidden');
@@ -162,9 +170,15 @@ async function runSearch(query) {
       renderGroupedResults(localResults, query);
     }
 
-    // Stage 2: Show pending state and fetch AI answer in background.
-    displayPendingAnswer();
-    fetchAIAnswer(query);
+    // Stage 2: Mike-style questions → hint only (press Enter to open dashboard); else sidebar AI summary.
+    if (shouldRouteToMikeRoss(query)) {
+      queryAnswer.classList.remove('hidden');
+      queryAnswer.innerHTML =
+        '<div class="answer-mike-hint">Press <kbd>Enter</kbd> to open the dashboard and send this to Mike Ross.</div>';
+    } else {
+      displayPendingAnswer();
+      fetchAIAnswer(query);
+    }
 
   } catch (err) {
     showSpinner(false);
@@ -179,6 +193,35 @@ function displayPendingAnswer() {
   queryAnswer.classList.remove('hidden');
 }
 
+const LM_API_BASE = 'http://127.0.0.1:8000';
+
+/** Opens analytics dashboard with query prefilled for Mike Ross chat (`?chat=`). */
+function openDashboardWithChatQuery(query) {
+  const base = chrome.runtime.getURL('dashboard.html');
+  const url = `${base}?chat=${encodeURIComponent(query)}`;
+  chrome.tabs.create({ url });
+}
+
+/** Natural-language asks for location in history or explicit links — route to Dashboard Mike Ross. */
+function shouldRouteToMikeRoss(raw) {
+  const q = (raw || '').trim().toLowerCase();
+  if (q.length < 4) return false;
+  const patterns = [
+    /\bwhere\s+is\s+(this|that|the)?\s*(topic|it|article|page|post|thing)\b/,
+    /\bwhere\s+did\s+i\s+(read|see|find|save|bookmark)\b/,
+    /\bwhere\s+can\s+i\s+find\b/,
+    /\bwhere\s+was\s+(this|that|it)\b/,
+    /\blist\s+(the\s+)?links?\b/,
+    /\b(show|give)\s+(me\s+)?(the\s+)?links?\b/,
+    /\blinks?\s+to\s+(this|that|it|the\s+topic)\b/,
+    /\burls?\s+for\s+(this|that|it)\b/,
+    /\bwhat\s+page\s+(was|is)\s+(that|this|it)\b/,
+    /\bwhich\s+(page|site|pages|sites|url|urls)\b/,
+    /\bpoint\s+me\s+to\s+(the\s+)?(page|link|url|article)\b/,
+  ];
+  return patterns.some((re) => re.test(q));
+}
+
 async function getLocalVectorResults(query, sourceFilter = 'all') {
   const response = await bgMessage({ type: 'SEARCH_QUERY', query, sourceFilter });
   const results = response?.results || [];
@@ -187,11 +230,10 @@ async function getLocalVectorResults(query, sourceFilter = 'all') {
 
 async function fetchAIAnswer(query) {
   try {
-    const res = await fetch('http://127.0.0.1:8000/query', {
+    const res = await fetch(`${LM_API_BASE}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query }),
-      timeout: 120000,
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -206,6 +248,7 @@ async function fetchAIAnswer(query) {
   } catch (err) {
     console.warn('[LocalMind] AI answer fetch failed:', err);
     queryAnswer.textContent = 'AI response unavailable.';
+    queryAnswer.classList.remove('hidden');
   }
 }
 

@@ -382,6 +382,22 @@ html, body {
   animation: pulse 1.4s ease-in-out infinite;
 }
 
+.answer-mike-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.answer-mike-hint kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated, rgba(0, 0, 0, 0.2));
+  color: var(--text-primary);
+}
+
 .memory-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
