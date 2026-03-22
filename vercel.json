@@ -1,0 +1,6 @@
+{
+  "rootDirectory": "extension",
+  "rewrites": [
+    { "source": "/", "destination": "/home.html" }
+  ]
+}
