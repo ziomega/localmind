@@ -23,12 +23,11 @@
   ],
 
   "commands": {
-    "open-sidebar": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Ctrl+Shift+K",
         "mac": "Command+Shift+K"
-      },
-      "description": "Open Local Mind memory sidebar"
+      }
     }
   },
 
