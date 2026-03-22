@@ -1,5 +1,23 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/home.html" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "extension/home.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "extension/home.js",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "extension/home.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "extension/$1"
+    }
   ]
 }
