@@ -78,3 +78,35 @@ async function pruneIfNeeded() {
     await chrome.storage.local.remove(toDelete);
   }
 }
+
+
+const BLACKLIST_KEY = 'lm_blacklist';
+
+export async function getBlacklist() {
+  const data = await chrome.storage.local.get(BLACKLIST_KEY);
+  return data[BLACKLIST_KEY] || [];
+}
+
+export async function addToBlacklist(domain) {
+  const list = await getBlacklist();
+  if (!list.includes(domain)) {
+    list.push(domain);
+    await chrome.storage.local.set({ [BLACKLIST_KEY]: list });
+  }
+}
+
+export async function removeFromBlacklist(domain) {
+  const list = await getBlacklist();
+  const updated = list.filter(d => d !== domain);
+  await chrome.storage.local.set({ [BLACKLIST_KEY]: updated });
+}
+
+export async function isBlacklisted(url) {
+  try {
+    const domain = new URL(url).hostname.replace('www.', '');
+    const list = await getBlacklist();
+    return list.some(d => domain === d || domain.endsWith('.' + d));
+  } catch {
+    return false;
+  }
+}

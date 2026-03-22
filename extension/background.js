@@ -1,4 +1,4 @@
-import { savePageToMemory, searchMemory, getRecentPages } from './utils/storage.js';
+import { savePageToMemory, searchMemory, getRecentPages, getBlacklist, addToBlacklist, removeFromBlacklist, isBlacklisted } from './utils/storage.js';
 import { generateEmbedding } from './utils/embeddings.js';
 
 // ── Search engine URL patterns ────────────────────────────────────────────────
@@ -119,53 +119,72 @@ async function handleMessage(message, sender) {
     }
 
     case 'CLEAR_MEMORY': {
-    const allData = await chrome.storage.local.get(null);
-    const now = Date.now();
+      const allData = await chrome.storage.local.get(null);
+      const now = Date.now();
 
-    const cutoff = {
+      const cutoff = {
         hour: now - 60 * 60 * 1000,
         day:  now - 24 * 60 * 60 * 1000,
         all:  0,
-    }[message.range || 'all'];
+      }[message.range || 'all'];
 
-    const pageKeys = Object.keys(allData).filter(k => {
+      const pageKeys = Object.keys(allData).filter(k => {
         if (!k.startsWith('page_')) return false;
         if (message.range === 'all') return true;
         return (allData[k].timestamp || 0) >= cutoff;
-    });
+      });
 
-    await chrome.storage.local.remove(pageKeys);
+      await chrome.storage.local.remove(pageKeys);
 
-    if (message.range === 'all') {
+      if (message.range === 'all') {
         await chrome.storage.session.clear();
         await chrome.action.setBadgeText({ text: '' });
         await chrome.action.setTitle({ title: 'Open Local Mind' });
-    }
+      }
 
-    return { ok: true };
+      return { ok: true };
     }
 
     case 'DELETE_PAGE': {
-    const key = 'page_' + btoa(encodeURIComponent(message.url)).replace(/[^a-z0-9]/gi, '').slice(0, 40);
-    await chrome.storage.local.remove(key);
-    return { ok: true };
+      const key = 'page_' + btoa(encodeURIComponent(message.url)).replace(/[^a-z0-9]/gi, '').slice(0, 40);
+      await chrome.storage.local.remove(key);
+      return { ok: true };
+    }
+
+    case 'GET_BLACKLIST':
+      return { list: await getBlacklist() };
+
+    case 'ADD_TO_BLACKLIST': {
+      await addToBlacklist(message.domain);
+      return { ok: true };
+    }
+
+    case 'REMOVE_FROM_BLACKLIST': {
+      await removeFromBlacklist(message.domain);
+      return { ok: true };
     }
 
     default:
-    return { error: 'Unknown message type' };
-    }
+      return { error: 'Unknown message type' };
+  }
 }
 
 // ── Indexing ──────────────────────────────────────────────────────────────────
 
 async function indexPage({ url, title, text, timestamp }) {
   if (!url) return;
+
+  // Check blacklist first
+  if (await isBlacklisted(url)) {
+    console.log('[LocalMind] Skipping blacklisted page:', url);
+    return;
+  }
+
   const key = urlToKey(url);
   const existing = await chrome.storage.local.get(key);
   const existingRecord = existing[key];
   const trimmedText = text.slice(0, 500);
 
-  // Revisits should refresh metadata/timestamp; only regenerate vectors when content changes.
   if (existingRecord) {
     const hasContentChanged = (existingRecord.text || '') !== trimmedText;
     let embedding = existingRecord.embedding || null;
@@ -180,8 +199,7 @@ async function indexPage({ url, title, text, timestamp }) {
 
     await savePageToMemory({
       ...existingRecord,
-      url,
-      title,
+      url, title,
       text: trimmedText,
       embedding,
       timestamp,
@@ -200,8 +218,7 @@ async function indexPage({ url, title, text, timestamp }) {
   });
 
   await savePageToMemory({
-    url,
-    title,
+    url, title,
     text: trimmedText,
     embedding,
     timestamp,
@@ -226,7 +243,7 @@ async function handleSearch(query, sourceFilter = 'all') {
 }
 
 function urlToKey(url) {
-  return 'page_' + btoa(encodeURIComponent(url))    .replace(/[^a-z0-9]/gi, '').slice(0, 40);
+  return 'page_' + btoa(encodeURIComponent(url)).replace(/[^a-z0-9]/gi, '').slice(0, 40);
 }
 
 function bookmarkIdToKey(bookmarkId) {
@@ -309,6 +326,13 @@ function collectBookmarksWithPath(nodes, parentPath = '') {
 
 async function indexBookmark(bookmark, folderPath = 'Root') {
   if (!bookmark?.url) return;
+
+  // Check blacklist for bookmarks too
+  if (await isBlacklisted(bookmark.url)) {
+    console.log('[LocalMind] Skipping blacklisted bookmark:', bookmark.url);
+    return;
+  }
+
   let hostname = '';
   try {
     hostname = new URL(bookmark.url).hostname;
@@ -344,6 +368,7 @@ async function indexBookmark(bookmark, folderPath = 'Root') {
     taskType: 'RETRIEVAL_DOCUMENT',
     title: bookmark.title || undefined,
   });
+
   await savePageToMemory({
     memoryId,
     url: bookmark.url,

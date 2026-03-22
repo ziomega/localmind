@@ -412,6 +412,9 @@ function createCard(page, delay = 0, highlight = '') {
       <button class="copy-title-btn">
         <span class="menu-icon">📋</span> Copy title
       </button>
+      <button class="block-site-btn">
+        <span class="menu-icon">🚫</span> Block this site
+      </button>
       <hr/>
       <button class="delete-btn danger">
         <span class="menu-icon">🗑</span> Remove from memory
@@ -443,6 +446,16 @@ function createCard(page, delay = 0, highlight = '') {
       showToast('Title copied!');
       closeActiveDropdown();
     });
+
+    // Block site — ADD THIS BLOCK
+dropdown.querySelector('.block-site-btn').addEventListener('click', async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  closeActiveDropdown();
+  const siteDomain = extractDomain(page.url);
+  await bgMessage({ type: 'ADD_TO_BLACKLIST', domain: siteDomain });
+  showToast(`${siteDomain} blocked`);
+});
 
     // Delete
     dropdown.querySelector('.delete-btn').addEventListener('click', async (e) => {
@@ -720,6 +733,119 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// ── Blacklist panel ───────────────────────────────────────────────────────────
+
+document.getElementById('blacklistBtn').addEventListener('click', () => {
+  openBlacklistPanel();
+});
+
+async function openBlacklistPanel() {
+  // Remove existing panel if any
+  document.getElementById('blacklistPanel')?.remove();
+
+  const panel = document.createElement('div');
+  panel.className = 'blacklist-panel';
+  panel.id = 'blacklistPanel';
+
+  panel.innerHTML = `
+    <div class="blacklist-header">
+      <span class="blacklist-title">Blocked sites</span>
+      <button class="blacklist-close" id="blacklistClose">✕</button>
+    </div>
+    <div class="blacklist-add">
+      <input
+        class="blacklist-input"
+        id="blacklistInput"
+        type="text"
+        placeholder="example.com"
+        spellcheck="false"
+        autocomplete="off"
+      />
+      <button class="blacklist-add-btn" id="blacklistAddBtn">Block</button>
+    </div>
+    <div class="blacklist-list" id="blacklistList"></div>
+    <div class="blacklist-hint">Blocked sites are never indexed or stored.</div>
+  `;
+
+  document.querySelector('.shell').appendChild(panel);
+
+  // Load existing list
+  await renderBlacklist();
+
+  // Close
+  document.getElementById('blacklistClose').addEventListener('click', () => {
+    panel.style.animation = 'none';
+    panel.style.opacity = '0';
+    panel.style.transition = 'opacity 0.15s';
+    setTimeout(() => panel.remove(), 150);
+  });
+
+  // Add on button click
+  document.getElementById('blacklistAddBtn').addEventListener('click', addBlacklistEntry);
+
+  // Add on Enter key
+  document.getElementById('blacklistInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addBlacklistEntry();
+  });
+}
+
+async function renderBlacklist() {
+  const response = await bgMessage({ type: 'GET_BLACKLIST' });
+  const list = response?.list || [];
+  const listEl = document.getElementById('blacklistList');
+  if (!listEl) return;
+
+  if (list.length === 0) {
+    listEl.innerHTML = `
+      <div class="blacklist-empty">
+        No sites blocked yet.<br>
+        Add a domain like <code style="color:var(--accent)">twitter.com</code> to stop it being indexed.
+      </div>`;
+    return;
+  }
+
+  listEl.innerHTML = '';
+  list.forEach((domain, i) => {
+    const item = document.createElement('div');
+    item.className = 'blacklist-item';
+    item.style.animationDelay = `${i * 30}ms`;
+    item.innerHTML = `
+      <span class="blacklist-domain">🚫 ${domain}</span>
+      <button class="blacklist-remove" data-domain="${domain}">Remove</button>
+    `;
+    item.querySelector('.blacklist-remove').addEventListener('click', async () => {
+      await bgMessage({ type: 'REMOVE_FROM_BLACKLIST', domain });
+      item.style.opacity = '0';
+      item.style.transition = 'opacity 0.15s';
+      setTimeout(() => renderBlacklist(), 150);
+    });
+    listEl.appendChild(item);
+  });
+}
+
+async function addBlacklistEntry() {
+  const input = document.getElementById('blacklistInput');
+  if (!input) return;
+
+  let domain = input.value.trim().toLowerCase();
+  if (!domain) return;
+
+  // Strip protocol and path if user pastes a full URL
+  try {
+    if (domain.includes('://')) {
+      domain = new URL(domain).hostname;
+    }
+    domain = domain.replace('www.', '');
+  } catch { /* keep as-is */ }
+
+  if (!domain) return;
+
+  await bgMessage({ type: 'ADD_TO_BLACKLIST', domain });
+  input.value = '';
+  await renderBlacklist();
+  showToast(`${domain} blocked`);
+}
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
