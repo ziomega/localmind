@@ -155,7 +155,10 @@ async function indexPage({ url, title, text, timestamp }) {
   }
 
   console.log('[LocalMind] Indexing:', title);
-  const embedding = await generateEmbedding(text);
+  const embedding = await generateEmbedding(text, {
+    taskType: 'RETRIEVAL_DOCUMENT',
+    title: title || undefined,
+  });
 
   await savePageToMemory({
     url, title,
@@ -178,7 +181,7 @@ async function indexPage({ url, title, text, timestamp }) {
 
 async function handleSearch(query, sourceFilter = 'all') {
   if (!query || query.trim().length < 2) return [];
-  const queryEmbedding = await generateEmbedding(query);
+  const queryEmbedding = await generateEmbedding(query, { taskType: 'RETRIEVAL_QUERY' });
   return await searchMemory({ queryEmbedding, queryText: query, topK: 20, sourceFilter });
 }
 
@@ -297,7 +300,10 @@ async function indexBookmark(bookmark, folderPath = 'Root') {
     ? `${baseText}\n\nPage content snapshot: ${fetchedContent}`.slice(0, 5000)
     : baseText;
 
-  const embedding = await generateEmbedding(text);
+  const embedding = await generateEmbedding(text, {
+    taskType: 'RETRIEVAL_DOCUMENT',
+    title: bookmark.title || undefined,
+  });
   await savePageToMemory({
     memoryId,
     url: bookmark.url,
