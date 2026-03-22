@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Local Mind Analytics Dashboard</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Instrument+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<style>
+		:root {
+			--bg: #0a0a0c;
+			--bg2: #0f0f12;
+			--bg3: #141418;
+			--accent: #7c6af7;
+			--accent2: #9d8fff;
+			--accent-dim: rgba(124,106,247,0.12);
+			--accent-glow: rgba(124,106,247,0.25);
+			--border: #1e1e26;
+			--border2: #2a2a35;
+			--text: #e8e8f0;
+			--text2: #9898aa;
+			--text3: #55555f;
+			--green: #4ade80;
+			--danger: #f87171;
+			--radius: 16px;
+			--serif: 'Fraunces', Georgia, serif;
+			--sans: 'Instrument Sans', system-ui, sans-serif;
+			--mono: 'DM Mono', monospace;
+		}
+
+		[data-theme="light"] {
+			--bg: #f6f3ec;
+			--bg2: #fffdfa;
+			--bg3: #f1ecdf;
+			--accent: #5f4ae5;
+			--accent2: #7b6cff;
+			--accent-dim: rgba(95,74,229,0.12);
+			--accent-glow: rgba(95,74,229,0.2);
+			--border: #ddd6c6;
+			--border2: #c9c0af;
+			--text: #1f1d1a;
+			--text2: #59544d;
+			--text3: #7a7368;
+			--green: #2f9b63;
+			--danger: #c2410c;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			font-family: var(--sans);
+			color: var(--text);
+			background:
+				radial-gradient(ellipse at 75% -10%, rgba(124,106,247,0.12) 0%, transparent 45%),
+				radial-gradient(ellipse at -10% 110%, rgba(124,106,247,0.08) 0%, transparent 35%),
+				var(--bg);
+			min-height: 100vh;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			inset: 0;
+			background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+			pointer-events: none;
+			opacity: 0.35;
+			z-index: 0;
+		}
+
+		.wrap {
+			max-width: 1320px;
+			margin: 0 auto;
+			padding: 22px;
+			position: relative;
+			z-index: 1;
+		}
+
+		.header {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			align-items: end;
+			gap: 14px;
+			margin-bottom: 20px;
+		}
+
+		.title {
+			font-family: var(--serif);
+			font-size: clamp(1.6rem, 2.8vw, 2.5rem);
+			margin: 0;
+			letter-spacing: -0.03em;
+			font-weight: 300;
+			line-height: 1.08;
+		}
+
+		.subtitle {
+			margin: 6px 0 0;
+			color: var(--text2);
+			font-size: 1rem;
+			max-width: 760px;
+		}
+
+		.actions {
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+
+		button, .pill {
+			border: 1px solid var(--border2);
+			background: var(--bg2);
+			color: var(--text2);
+			border-radius: 999px;
+			padding: 9px 14px;
+			font-size: 0.82rem;
+			cursor: pointer;
+			font-family: var(--mono);
+			transition: all 0.2s;
+			letter-spacing: 0.03em;
+		}
+
+		button:hover {
+			color: var(--text);
+			border-color: var(--text3);
+		}
+
+		button.primary {
+			background: var(--accent);
+			border-color: transparent;
+			color: white;
+			font-weight: 600;
+			font-family: var(--sans);
+		}
+
+		button.primary:hover {
+			background: #6b59e0;
+			box-shadow: 0 8px 30px rgba(124,106,247,0.35);
+			border-color: transparent;
+			color: white;
+		}
+
+		.theme-toggle {
+			text-transform: uppercase;
+		}
+
+		.kpis {
+			display: grid;
+			grid-template-columns: repeat(6, minmax(140px, 1fr));
+			gap: 12px;
+			margin-bottom: 18px;
+		}
+
+		.chat-priority {
+			margin-bottom: 18px;
+		}
+
+		.chat-priority-grid {
+			display: grid;
+			grid-template-columns: 1.6fr 1fr;
+			gap: 12px;
+		}
+
+		.card {
+			background: var(--bg2);
+			border: 1px solid var(--border2);
+			border-radius: var(--radius);
+			padding: 14px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+			position: relative;
+			overflow: hidden;
+		}
+
+		.card::after {
+			content: '';
+			position: absolute;
+			top: -48px;
+			right: -60px;
+			width: 220px;
+			height: 160px;
+			background: radial-gradient(ellipse, rgba(124,106,247,0.09) 0%, transparent 70%);
+			pointer-events: none;
+		}
+
+		.kpi-label {
+			color: var(--text3);
+			font-size: 0.78rem;
+			text-transform: uppercase;
+			letter-spacing: 0.06em;
+			font-family: var(--mono);
+		}
+
+		.kpi-value {
+			font-family: var(--serif);
+			margin-top: 6px;
+			font-size: 1.5rem;
+			font-weight: 400;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: 1.6fr 1fr;
+			gap: 14px;
+			margin-bottom: 14px;
+		}
+
+		.grid-2 {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 14px;
+			margin-bottom: 14px;
+		}
+
+		.card h3 {
+			margin: 0 0 8px;
+			font-family: var(--serif);
+			font-size: 1.2rem;
+			font-weight: 400;
+			letter-spacing: -0.01em;
+		}
+
+		.chart-shell {
+			position: relative;
+			min-height: 270px;
+		}
+
+		.list {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			display: grid;
+			gap: 8px;
+			max-height: 270px;
+			overflow: auto;
+		}
+
+		.list li {
+			background: var(--bg3);
+			border: 1px solid var(--border2);
+			border-radius: 10px;
+			padding: 9px 10px;
+			display: flex;
+			justify-content: space-between;
+			gap: 10px;
+			font-size: 0.9rem;
+		}
+
+		.muted { color: var(--text3); }
+
+		.chat-shell {
+			display: grid;
+			grid-template-rows: 1fr auto;
+			gap: 10px;
+			min-height: 320px;
+		}
+
+		.chat-window {
+			background: var(--bg3);
+			border: 1px solid var(--border2);
+			border-radius: 12px;
+			padding: 12px;
+			overflow: auto;
+			max-height: 330px;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+
+		.chat-msg {
+			padding: 10px 12px;
+			border-radius: 10px;
+			line-height: 1.45;
+			font-size: 0.92rem;
+			white-space: pre-wrap;
+		}
+
+		.chat-msg.user {
+			align-self: flex-end;
+			max-width: 80%;
+			background: rgba(124,106,247,0.16);
+			border: 1px solid rgba(124,106,247,0.32);
+		}
+
+		.chat-msg.bot {
+			align-self: flex-start;
+			max-width: 92%;
+			background: var(--bg2);
+			border: 1px solid var(--border2);
+		}
+
+		.chat-meta {
+			font-family: var(--mono);
+			font-size: 0.72rem;
+			color: var(--text3);
+			margin-bottom: 6px;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.chat-form {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			gap: 8px;
+		}
+
+		.chat-side {
+			background: var(--bg3);
+			border: 1px solid var(--border2);
+			border-radius: 12px;
+			padding: 12px;
+			display: grid;
+			gap: 10px;
+			align-content: start;
+		}
+
+		.chat-side h4 {
+			margin: 0;
+			font-family: var(--mono);
+			font-size: 0.73rem;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--text3);
+		}
+
+		.chat-sources {
+			display: grid;
+			gap: 7px;
+			max-height: 180px;
+			overflow: auto;
+		}
+
+		.chat-source {
+			background: var(--bg2);
+			border: 1px solid var(--border2);
+			border-radius: 9px;
+			padding: 8px;
+			font-size: 0.85rem;
+		}
+
+		.chat-source small {
+			display: block;
+			margin-top: 4px;
+			font-family: var(--mono);
+			font-size: 0.68rem;
+			color: var(--text3);
+		}
+
+		.chat-quick {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 7px;
+		}
+
+		.chat-chip {
+			border: 1px solid var(--border2);
+			background: var(--bg2);
+			color: var(--text2);
+			border-radius: 999px;
+			padding: 6px 10px;
+			font-size: 0.74rem;
+			font-family: var(--mono);
+			cursor: pointer;
+		}
+
+		.chat-chip:hover {
+			color: var(--text);
+			border-color: var(--accent);
+		}
+
+		.chat-typing {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+		.chat-typing span {
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: var(--accent2);
+			animation: chat-bounce 1s infinite ease-in-out;
+		}
+
+		.chat-typing span:nth-child(2) { animation-delay: 0.12s; }
+		.chat-typing span:nth-child(3) { animation-delay: 0.24s; }
+
+		@keyframes chat-bounce {
+			0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
+			40% { transform: translateY(-4px); opacity: 1; }
+		}
+
+		.chat-form input {
+			border: 1px solid var(--border2);
+			border-radius: 10px;
+			padding: 10px 12px;
+			font-size: 0.95rem;
+			background: var(--bg3);
+			color: var(--text);
+		}
+
+		.toolbar {
+			display: grid;
+			grid-template-columns: 1fr auto auto;
+			gap: 10px;
+			margin-bottom: 10px;
+		}
+
+		input[type="search"] {
+			border: 1px solid var(--border2);
+			border-radius: 10px;
+			padding: 10px 12px;
+			font-size: 0.95rem;
+			width: 100%;
+			background: var(--bg3);
+			color: var(--text);
+			font-family: var(--sans);
+		}
+
+		input[type="search"]::placeholder {
+			color: var(--text3);
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 0.9rem;
+			border: 1px solid var(--border2);
+			border-radius: 10px;
+			overflow: hidden;
+			background: var(--bg3);
+		}
+
+		th, td {
+			border-bottom: 1px solid var(--border);
+			text-align: left;
+			vertical-align: top;
+			padding: 9px 10px;
+		}
+
+		th {
+			background: var(--bg2);
+			font-size: 0.8rem;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: var(--text3);
+			font-family: var(--mono);
+		}
+
+		.url {
+			max-width: 260px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			display: inline-block;
+		}
+
+		.snippet {
+			max-width: 420px;
+			color: var(--text2);
+		}
+
+		.tag {
+			background: var(--accent-dim);
+			color: var(--accent2);
+			border: 1px solid rgba(124,106,247,0.2);
+			padding: 2px 7px;
+			border-radius: 999px;
+			font-size: 0.76rem;
+			font-weight: 600;
+			font-family: var(--mono);
+		}
+
+		.error {
+			color: var(--danger);
+			font-weight: 600;
+			margin-top: 8px;
+		}
+
+		a {
+			color: #7ca5f7;
+		}
+
+		a:hover {
+			color: #95b6ff;
+		}
+
+		/* Chart.js legend and axis theming to match index palette */
+		canvas {
+			filter: saturate(1.05);
+		}
+
+		@media (max-width: 1100px) {
+			.chat-priority-grid { grid-template-columns: 1fr; }
+			.kpis { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
+			.grid { grid-template-columns: 1fr; }
+			.grid-2 { grid-template-columns: 1fr; }
+			.toolbar { grid-template-columns: 1fr; }
+		}
+
+		@media (max-width: 640px) {
+			.kpis { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+			.wrap { padding: 14px; }
+			.header { grid-template-columns: 1fr; }
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<header class="header">
+			<div>
+				<h1 class="title">Local Mind Analytics Dashboard</h1>
+				<p class="subtitle">Complete organization of browsing memory, usage patterns, content trends, and detailed history records.</p>
+			</div>
+			<div class="actions">
+				<span class="pill" id="lastSync">Last sync: never</span>
+				<button id="themeToggle" class="theme-toggle" type="button">Light</button>
+				<button id="refreshBtn" class="primary">Refresh Analytics</button>
+			</div>
+		</header>
+
+		<section class="card chat-priority">
+			<h3>Chat With Mike Ross</h3>
+			<div class="chat-priority-grid">
+				<div class="chat-shell">
+					<div id="chatWindow" class="chat-window"></div>
+					<form id="chatForm" class="chat-form">
+						<input id="chatInput" type="text" placeholder="Ask Mike Ross about your browsing history..." />
+						<button id="chatSendBtn" type="submit" class="primary">Send</button>
+					</form>
+				</div>
+				<aside class="chat-side">
+					<h4>Quick Prompts</h4>
+					<div class="chat-quick">
+						<button class="chat-chip" type="button" data-q="What did I read today about chess?">Today + chess</button>
+						<button class="chat-chip" type="button" data-q="Which sites did I visit most this week?">Top sites this week</button>
+						<button class="chat-chip" type="button" data-q="Summarize what I read on Wikipedia recently.">Wikipedia recap</button>
+						<button class="chat-chip" type="button" data-q="Find pages where I spent the most time.">High time-spent pages</button>
+					</div>
+					<h4>Latest Sources</h4>
+					<div id="chatSources" class="chat-sources"></div>
+				</aside>
+			</div>
+		</section>
+
+		<section class="kpis" id="kpiGrid">
+			<article class="card"><div class="kpi-label">Total Records</div><div class="kpi-value" id="kTotalRecords">-</div></article>
+			<article class="card"><div class="kpi-label">Unique URLs</div><div class="kpi-value" id="kUniqueUrls">-</div></article>
+			<article class="card"><div class="kpi-label">Unique Domains</div><div class="kpi-value" id="kUniqueDomains">-</div></article>
+			<article class="card"><div class="kpi-label">Duplicate URLs</div><div class="kpi-value" id="kDupes">-</div></article>
+			<article class="card"><div class="kpi-label">Avg Content Length</div><div class="kpi-value" id="kAvgLen">-</div></article>
+			<article class="card"><div class="kpi-label">Tracked Time Spent</div><div class="kpi-value" id="kTrackedTime">-</div></article>
+		</section>
+
+		<section class="grid">
+			<article class="card">
+				<h3>Visit Activity by Date</h3>
+				<div class="chart-shell"><canvas id="dateChart"></canvas></div>
+			</article>
+			<article class="card">
+				<h3>Visit Activity by Hour</h3>
+				<div class="chart-shell"><canvas id="hourChart"></canvas></div>
+			</article>
+		</section>
+
+		<section class="grid-2"></section>
+
+		<section class="card">
+			<h3>Detailed History Records</h3>
+			<div class="toolbar">
+				<input id="searchInput" type="search" placeholder="Filter by title, domain, url, or snippet..." />
+				<button id="onlyTimedBtn">Only With Time Spent</button>
+				<button id="downloadBtn">Export JSON</button>
+			</div>
+			<div style="overflow:auto; max-height: 480px;">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Title</th>
+							<th>Domain</th>
+							<th>Visited</th>
+							<th>Time Spent</th>
+							<th>Content</th>
+							<th>URL</th>
+						</tr>
+					</thead>
+					<tbody id="historyBody"></tbody>
+				</table>
+			</div>
+			<div id="errorMsg" class="error"></div>
+		</section>
+	</div>
+
+	<script>
+		const API_BASE = 'http://127.0.0.1:8000';
+		const THEME_KEY = 'localmind-theme';
+		const state = {
+			data: null,
+			rows: [],
+			filtered: [],
+			onlyTimed: false,
+			charts: {},
+			typingTimer: null,
+		};
+
+		const WAITING_MESSAGES = [
+			'Give me ten seconds, photographic memory is kicking in...',
+			'Working this like a closing argument, one sec...',
+			'Scanning your tabs, dates, and receipts now...',
+			'Cross-checking timelines and content, hold on...',
+			'Pulling the strongest source-backed answer...',
+			'Connecting where you read it and when you read it...',
+			'Locking in the cleanest play from your history...',
+		];
+
+		const els = {
+			kTotalRecords: document.getElementById('kTotalRecords'),
+			kUniqueUrls: document.getElementById('kUniqueUrls'),
+			kUniqueDomains: document.getElementById('kUniqueDomains'),
+			kDupes: document.getElementById('kDupes'),
+			kAvgLen: document.getElementById('kAvgLen'),
+			kTrackedTime: document.getElementById('kTrackedTime'),
+			historyBody: document.getElementById('historyBody'),
+			chatWindow: document.getElementById('chatWindow'),
+			chatForm: document.getElementById('chatForm'),
+			chatInput: document.getElementById('chatInput'),
+			chatSendBtn: document.getElementById('chatSendBtn'),
+			chatSources: document.getElementById('chatSources'),
+			refreshBtn: document.getElementById('refreshBtn'),
+			themeToggle: document.getElementById('themeToggle'),
+			searchInput: document.getElementById('searchInput'),
+			onlyTimedBtn: document.getElementById('onlyTimedBtn'),
+			downloadBtn: document.getElementById('downloadBtn'),
+			lastSync: document.getElementById('lastSync'),
+			errorMsg: document.getElementById('errorMsg'),
+		};
+
+		els.refreshBtn.addEventListener('click', loadAnalytics);
+		els.themeToggle.addEventListener('click', toggleTheme);
+		els.chatForm.addEventListener('submit', onChatSubmit);
+		document.querySelectorAll('.chat-chip').forEach((chip) => {
+			chip.addEventListener('click', () => {
+				els.chatInput.value = chip.dataset.q || '';
+				els.chatInput.focus();
+			});
+		});
+		els.searchInput.addEventListener('input', applyFilters);
+		els.onlyTimedBtn.addEventListener('click', () => {
+			state.onlyTimed = !state.onlyTimed;
+			els.onlyTimedBtn.classList.toggle('primary', state.onlyTimed);
+			applyFilters();
+		});
+		els.downloadBtn.addEventListener('click', downloadData);
+
+		function formatNumber(n) {
+			return new Intl.NumberFormat().format(n || 0);
+		}
+
+		function formatDuration(ms) {
+			if (!ms || ms <= 0) return 'N/A';
+			const totalSeconds = Math.floor(ms / 1000);
+			const h = Math.floor(totalSeconds / 3600);
+			const m = Math.floor((totalSeconds % 3600) / 60);
+			const s = totalSeconds % 60;
+			if (h > 0) return `${h}h ${m}m`;
+			if (m > 0) return `${m}m ${s}s`;
+			return `${s}s`;
+		}
+
+		function formatDate(iso) {
+			if (!iso) return 'Unknown';
+			const d = new Date(iso);
+			if (Number.isNaN(d.getTime())) return 'Unknown';
+			return d.toLocaleString();
+		}
+
+		function safeDestroy(name) {
+			if (state.charts[name]) {
+				state.charts[name].destroy();
+			}
+		}
+
+		function getInitialTheme() {
+			const saved = localStorage.getItem(THEME_KEY);
+			if (saved === 'dark' || saved === 'light') return saved;
+			return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		}
+
+		function applyTheme(theme) {
+			document.documentElement.setAttribute('data-theme', theme);
+			els.themeToggle.textContent = theme === 'dark' ? 'Light' : 'Dark';
+		}
+
+		function toggleTheme() {
+			const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+			const next = current === 'dark' ? 'light' : 'dark';
+			localStorage.setItem(THEME_KEY, next);
+			applyTheme(next);
+			if (state.data) {
+				renderDateChart(state.data.visits_by_date || []);
+				renderHourChart(state.data.visits_by_hour || []);
+			}
+		}
+
+		function chartTheme() {
+			const style = getComputedStyle(document.documentElement);
+			const accent = style.getPropertyValue('--accent').trim() || '#7c6af7';
+			const accent2 = style.getPropertyValue('--accent2').trim() || '#9d8fff';
+			const text2 = style.getPropertyValue('--text2').trim() || '#9898aa';
+			const grid = style.getPropertyValue('--border').trim() || '#1e1e26';
+			const bg2 = style.getPropertyValue('--bg2').trim() || '#0f0f12';
+			return { accent, accent2, text2, grid, bg2 };
+		}
+
+		function renderKpis(summary) {
+			els.kTotalRecords.textContent = formatNumber(summary.total_records);
+			els.kUniqueUrls.textContent = formatNumber(summary.unique_urls);
+			els.kUniqueDomains.textContent = formatNumber(summary.unique_domains);
+			els.kDupes.textContent = formatNumber(summary.duplicate_urls);
+			els.kAvgLen.textContent = formatNumber(summary.avg_content_length);
+			els.kTrackedTime.textContent = formatDuration(summary.total_time_spent_ms);
+		}
+
+		function renderDateChart(points) {
+			const t = chartTheme();
+			const labels = points.map(p => p.date);
+			const values = points.map(p => p.count);
+			safeDestroy('date');
+			state.charts.date = new Chart(document.getElementById('dateChart'), {
+				type: 'line',
+				data: {
+					labels,
+					datasets: [{
+						label: 'Visits',
+						data: values,
+						borderColor: t.accent,
+						backgroundColor: 'rgba(124,106,247,0.18)',
+						fill: true,
+						tension: 0.35,
+						pointRadius: 3,
+						pointBackgroundColor: t.accent2
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: { legend: { display: false } },
+					scales: {
+						y: { beginAtZero: true, ticks: { color: t.text2 }, grid: { color: t.grid } },
+						x: { ticks: { color: t.text2 }, grid: { color: t.grid } }
+					}
+				}
+			});
+		}
+
+		function renderHourChart(points) {
+			const t = chartTheme();
+			const labels = points.map(p => `${String(p.hour).padStart(2, '0')}:00`);
+			const values = points.map(p => p.count);
+			safeDestroy('hour');
+			state.charts.hour = new Chart(document.getElementById('hourChart'), {
+				type: 'bar',
+				data: {
+					labels,
+					datasets: [{
+						label: 'Visits',
+						data: values,
+						backgroundColor: t.accent,
+						borderRadius: 6,
+						maxBarThickness: 24
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: { legend: { display: false } },
+					scales: {
+						y: { beginAtZero: true, ticks: { color: t.text2 }, grid: { color: t.grid } },
+						x: { ticks: { color: t.text2 }, grid: { color: t.grid } }
+					}
+				}
+			});
+		}
+
+		function escapeHtml(text) {
+			return String(text || '')
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#39;');
+		}
+
+		function addChatMessage(role, message, meta = '') {
+			const wrap = document.createElement('div');
+			wrap.className = `chat-msg ${role}`;
+			const metaHtml = meta ? `<div class="chat-meta">${escapeHtml(meta)}</div>` : '';
+			wrap.innerHTML = `${metaHtml}${escapeHtml(message)}`;
+			els.chatWindow.appendChild(wrap);
+			els.chatWindow.scrollTop = els.chatWindow.scrollHeight;
+			return wrap;
+		}
+
+		function randomWaitingMessage() {
+			return WAITING_MESSAGES[Math.floor(Math.random() * WAITING_MESSAGES.length)];
+		}
+
+		function addTypingIndicator() {
+			const wrap = document.createElement('div');
+			wrap.className = 'chat-msg bot';
+			wrap.id = 'typingIndicator';
+			wrap.innerHTML = `<div class="chat-meta">Mike Ross</div><div class="chat-typing"><span></span><span></span><span></span></div><div class="chat-meta" id="typingHint">${escapeHtml(randomWaitingMessage())}</div>`;
+			els.chatWindow.appendChild(wrap);
+			els.chatWindow.scrollTop = els.chatWindow.scrollHeight;
+
+			state.typingTimer = setInterval(() => {
+				const hint = document.getElementById('typingHint');
+				if (!hint) return;
+				hint.textContent = randomWaitingMessage();
+			}, 2200);
+		}
+
+		function removeTypingIndicator() {
+			if (state.typingTimer) {
+				clearInterval(state.typingTimer);
+				state.typingTimer = null;
+			}
+			const el = document.getElementById('typingIndicator');
+			if (el) el.remove();
+		}
+
+		function renderChatSourcesPanel(sources) {
+			els.chatSources.innerHTML = '';
+			if (!sources || sources.length === 0) {
+				els.chatSources.innerHTML = '<div class="chat-source muted">No sources yet. Ask Mike Ross a question.</div>';
+				return;
+			}
+			sources.slice(0, 5).forEach((s, i) => {
+				const item = document.createElement('div');
+				item.className = 'chat-source';
+				item.innerHTML = `${i + 1}. ${escapeHtml(s.title || 'Untitled')}<small>${escapeHtml(s.domain || 'unknown')}</small>`;
+				els.chatSources.appendChild(item);
+			});
+		}
+
+		function setChatWelcome(summary = {}, topDomains = []) {
+			els.chatWindow.innerHTML = '';
+			const totalRecords = summary.total_records || 0;
+			const uniqueDomains = summary.unique_domains || 0;
+			const domainFacts = (topDomains || []).slice(0, 3)
+				.map((d, i) => `${i + 1}. ${d.domain}: ${d.count}`)
+				.join('\n');
+
+			const intro = [
+				`You now have ${formatNumber(totalRecords)} records across ${formatNumber(uniqueDomains)} domains.`,
+				domainFacts ? `Most active domains right now:\n${domainFacts}` : '',
+				"Ask for timelines, patterns, or source-backed answers from your browsing history.",
+			].filter(Boolean).join('\n\n');
+
+			addChatMessage(
+				'bot',
+				intro,
+				'Mike Ross'
+			);
+			renderChatSourcesPanel([]);
+		}
+
+		function formatChatSources(sources) {
+			if (!sources || sources.length === 0) return '';
+			const top = sources.slice(0, 3);
+			return top.map((s, i) => `${i + 1}. ${s.title || 'Untitled'} (${s.domain || 'unknown'})`).join('\n');
+		}
+
+		async function onChatSubmit(event) {
+			event.preventDefault();
+			const message = (els.chatInput.value || '').trim();
+			if (!message) return;
+
+			addChatMessage('user', message, 'You');
+			els.chatInput.value = '';
+			els.chatSendBtn.disabled = true;
+			els.chatSendBtn.textContent = '...';
+			addTypingIndicator();
+
+			try {
+				const res = await fetch(`${API_BASE}/chat-history`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ message }),
+				});
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				const data = await res.json();
+				removeTypingIndicator();
+				addChatMessage('bot', data.reply || 'No reply available.', data.bot || 'Mike Ross');
+				const sourceText = formatChatSources(data.sources || []);
+				if (sourceText) {
+					addChatMessage('bot', sourceText, 'Sources');
+				}
+				renderChatSourcesPanel(data.sources || []);
+			} catch (err) {
+				console.error('[LocalMind Chat]', err);
+				removeTypingIndicator();
+				addChatMessage('bot', 'I could not read your history right now. Try again.', 'Mike Ross');
+			} finally {
+				els.chatSendBtn.disabled = false;
+				els.chatSendBtn.textContent = 'Send';
+			}
+		}
+
+		function consumeChatFromUrl() {
+			let chat;
+			try {
+				chat = new URLSearchParams(window.location.search).get('chat');
+			} catch (_) {
+				return;
+			}
+			const message = (chat || '').trim();
+			if (!message) return;
+			try {
+				const u = new URL(window.location.href);
+				u.searchParams.delete('chat');
+				const next = u.pathname + (u.search || '') + (u.hash || '');
+				window.history.replaceState({}, '', next);
+			} catch (_) {
+				/* ignore */
+			}
+			if (els.chatWindow) {
+				els.chatWindow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			}
+			els.chatInput.value = message;
+			requestAnimationFrame(() => {
+				els.chatInput.focus();
+				els.chatInput.setSelectionRange(message.length, message.length);
+			});
+		}
+
+		function toSearchBlob(r) {
+			return `${r.title || ''} ${r.domain || ''} ${r.url || ''} ${r.snippet || ''}`.toLowerCase();
+		}
+
+		function renderTable(rows) {
+			els.historyBody.innerHTML = '';
+			rows.forEach(r => {
+				const tr = document.createElement('tr');
+				tr.innerHTML = `
+					<td>${r.id}</td>
+					<td>${r.title || 'Untitled'}</td>
+					<td><span class="tag">${r.domain || 'unknown'}</span></td>
+					<td>${formatDate(r.visited_at || r.visited_date)}</td>
+					<td>${formatDuration(r.time_spent_ms)}</td>
+					<td class="snippet">${(r.snippet || '').replace(/</g, '&lt;')}</td>
+					<td><a class="url" href="${r.url}" target="_blank" rel="noopener">${r.url || ''}</a></td>
+				`;
+				els.historyBody.appendChild(tr);
+			});
+		}
+
+		function applyFilters() {
+			if (!state.rows) return;
+			const query = els.searchInput.value.trim().toLowerCase();
+			let rows = [...state.rows];
+			if (state.onlyTimed) {
+				rows = rows.filter(r => Number(r.time_spent_ms) > 0);
+			}
+			if (query) {
+				rows = rows.filter(r => toSearchBlob(r).includes(query));
+			}
+			state.filtered = rows;
+			renderTable(rows);
+		}
+
+		function downloadData() {
+			if (!state.data) return;
+			const blob = new Blob([JSON.stringify(state.data, null, 2)], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `localmind-analytics-${new Date().toISOString().slice(0,19).replace(/[:T]/g, '-')}.json`;
+			a.click();
+			URL.revokeObjectURL(url);
+		}
+
+		async function loadAnalytics() {
+			els.errorMsg.textContent = '';
+			els.refreshBtn.disabled = true;
+			els.refreshBtn.textContent = 'Refreshing...';
+
+			try {
+				const res = await fetch(`${API_BASE}/analytics?limit=2000`);
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				const data = await res.json();
+				state.data = data;
+				state.rows = data.records || [];
+
+				renderKpis(data.summary || {});
+				renderDateChart(data.visits_by_date || []);
+				renderHourChart(data.visits_by_hour || []);
+				applyFilters();
+				setChatWelcome(data.summary || {}, data.top_domains || []);
+
+				els.lastSync.textContent = `Last sync: ${new Date().toLocaleString()}`;
+			} catch (err) {
+				console.error('[LocalMind Dashboard]', err);
+				els.errorMsg.textContent = `Could not load analytics from ${API_BASE}/analytics. Ensure backend is running.`;
+			} finally {
+				els.refreshBtn.disabled = false;
+				els.refreshBtn.textContent = 'Refresh Analytics';
+			}
+		}
+
+		async function initDashboard() {
+			applyTheme(getInitialTheme());
+			await loadAnalytics();
+			consumeChatFromUrl();
+		}
+		initDashboard();
+	</script>
+</body>
+</html>

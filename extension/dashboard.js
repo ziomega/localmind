@@ -161,7 +161,38 @@ async function bootstrap() {
 	const openSidebarBtn = document.getElementById('openSidebarBtn');
 	if (openSidebarBtn) openSidebarBtn.addEventListener('click', () => openMemorySidebar());
 
-	loadAnalytics();
+	await loadAnalytics();
+	consumeChatFromUrl();
+}
+
+/** If opened as dashboard.html?chat=… (e.g. from sidebar), strip param and prefill chat; user presses Enter to send. */
+function consumeChatFromUrl() {
+	let chat;
+	try {
+		chat = new URLSearchParams(window.location.search).get('chat');
+	} catch (_) {
+		return;
+	}
+	const message = (chat || '').trim();
+	if (!message) return;
+
+	try {
+		const u = new URL(window.location.href);
+		u.searchParams.delete('chat');
+		const next = u.pathname + (u.search || '') + (u.hash || '');
+		window.history.replaceState({}, '', next);
+	} catch (_) {
+		/* ignore */
+	}
+
+	if (els.chatWindow) {
+		els.chatWindow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+	}
+	els.chatInput.value = message;
+	requestAnimationFrame(() => {
+		els.chatInput.focus();
+		els.chatInput.setSelectionRange(message.length, message.length);
+	});
 }
 
 function chartTheme() {
