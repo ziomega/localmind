@@ -14,6 +14,19 @@ const BACKEND_STORE_URL = 'http://127.0.0.1:8000/store';
 const BOOKMARK_RESYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const BOOKMARK_FETCH_TIMEOUT_MS = 5000;
 
+// ── Keyboard shortcut: open memory sidebar ────────────────────────────────────
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command !== 'open-sidebar') return;
+  try {
+    const win = await chrome.windows.getLastFocused({ populate: false });
+    const wid = win?.id;
+    if (wid != null) await chrome.sidePanel.open({ windowId: wid });
+  } catch (err) {
+    console.warn('[LocalMind] Shortcut open-sidebar failed:', err);
+  }
+});
+
 // ── Open sidebar when extension icon is clicked ───────────────────────────────
 
 chrome.action.onClicked.addListener(async (tab) => {

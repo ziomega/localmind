@@ -37,24 +37,56 @@ function applyTheme(theme) {
   }
 }
 
-function initTheme() {
-  const saved = localStorage.getItem('lm-theme') || 'dark';
-  applyTheme(saved);
+async function initTheme() {
+  let theme = 'dark';
+  try {
+    const { lmTheme } = await chrome.storage.local.get('lmTheme');
+    if (lmTheme === 'light' || lmTheme === 'dark') theme = lmTheme;
+    else {
+      const legacy = localStorage.getItem('lm-theme');
+      if (legacy === 'light' || legacy === 'dark') theme = legacy;
+    }
+  } catch (_) {
+    const legacy = localStorage.getItem('lm-theme');
+    if (legacy === 'light' || legacy === 'dark') theme = legacy;
+  }
+  localStorage.setItem('lm-theme', theme);
+  try {
+    await chrome.storage.local.set({ lmTheme: theme });
+  } catch (_) { /* ignore */ }
+  applyTheme(theme);
 }
 
-themeToggle.addEventListener('click', () => {
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local' || !changes.lmTheme) return;
+  const next = changes.lmTheme.newValue;
+  if (next !== 'light' && next !== 'dark') return;
+  localStorage.setItem('lm-theme', next);
+  applyTheme(next);
+});
+
+themeToggle.addEventListener('click', async () => {
   const isLight = document.documentElement.classList.contains('light');
   const next = isLight ? 'dark' : 'light';
   localStorage.setItem('lm-theme', next);
+  try {
+    await chrome.storage.local.set({ lmTheme: next });
+    await chrome.storage.session.set({ lmTheme: next });
+  } catch (_) {
+    chrome.storage.session.set({ lmTheme: next });
+  }
   applyTheme(next);
-  // Notify injected panel to sync theme
-  chrome.storage.session.set({ lmTheme: next });
+});
+
+const openDashboardBtn = document.getElementById('openDashboardBtn');
+openDashboardBtn?.addEventListener('click', () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
-  initTheme();
+  await initTheme();
   await loadTimeline();
   await updateIndexCount();
 }
