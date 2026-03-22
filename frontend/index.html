@@ -57,7 +57,6 @@
       overflow-x: hidden;
     }
 
-    /* ── Noise overlay ─────────────────────────────────────────────── */
     body::before {
       content: '';
       position: fixed;
@@ -101,10 +100,7 @@
       transition: all 0.2s;
     }
 
-    .theme-toggle-btn:hover {
-      color: var(--text);
-      border-color: var(--text3);
-    }
+    .theme-toggle-btn:hover { color: var(--text); border-color: var(--text3); }
 
     .nav-logo {
       display: flex;
@@ -126,33 +122,15 @@
       50% { box-shadow: 0 0 20px rgba(124,106,247,0.5); }
     }
 
-    .nav-logo-text {
-      font-family: var(--serif);
-      font-size: 20px;
-      color: var(--text);
-      letter-spacing: -0.3px;
-    }
-
+    .nav-logo-text { font-family: var(--serif); font-size: 20px; color: var(--text); letter-spacing: -0.3px; }
     .nav-logo-text em { font-style: italic; color: var(--accent); }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--text2);
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.15s;
-    }
-
+    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--text2); text-decoration: none; font-size: 14px; transition: color 0.15s; }
     .nav-links a:hover { color: var(--text); }
 
     .nav-cta {
-      background: var(--accent);
+      background: var(--accent) !important;
       color: white !important;
       padding: 8px 20px;
       border-radius: 8px;
@@ -160,8 +138,7 @@
       font-weight: 500;
       transition: background 0.15s !important;
     }
-
-    .nav-cta:hover { background: #6b59e0 !important; color: white !important; }
+    .nav-cta:hover { background: #6b59e0 !important; }
 
     /* ── Hero ──────────────────────────────────────────────────────── */
     .hero {
@@ -171,19 +148,16 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 120px 24px 80px;
+      padding: 120px 24px 120px;
       position: relative;
     }
 
-    /* Radial glow behind hero */
     .hero::after {
       content: '';
       position: absolute;
-      top: 20%;
-      left: 50%;
+      top: 20%; left: 50%;
       transform: translateX(-50%);
-      width: 600px;
-      height: 400px;
+      width: 600px; height: 400px;
       background: radial-gradient(ellipse, rgba(124,106,247,0.12) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
@@ -226,17 +200,8 @@
       animation: fadeUp 0.8s 0.1s ease both;
     }
 
-    .hero-title em {
-      font-style: italic;
-      color: var(--accent);
-      font-weight: 300;
-    }
-
-    .hero-title .line2 {
-      display: block;
-      color: var(--text2);
-      font-weight: 300;
-    }
+    .hero-title em { font-style: italic; color: var(--accent); font-weight: 300; }
+    .hero-title .line2 { display: block; color: var(--text2); font-weight: 300; }
 
     .hero-sub {
       font-size: 18px;
@@ -244,7 +209,6 @@
       max-width: 520px;
       margin: 28px auto 0;
       line-height: 1.7;
-      font-weight: 400;
       position: relative;
       z-index: 1;
       animation: fadeUp 0.8s 0.2s ease both;
@@ -296,10 +260,7 @@
       transition: all 0.2s;
     }
 
-    .btn-secondary:hover {
-      color: var(--text);
-      border-color: var(--text3);
-    }
+    .btn-secondary:hover { color: var(--text); border-color: var(--text3); }
 
     .hero-note {
       margin-top: 20px;
@@ -311,178 +272,9 @@
       animation: fadeUp 0.8s 0.4s ease both;
     }
 
-    /* ── Browser mockup ────────────────────────────────────────────── */
-    .hero-visual {
-      margin-top: 80px;
-      position: relative;
-      z-index: 1;
-      animation: fadeUp 0.8s 0.5s ease both;
-      width: 100%;
-      max-width: 900px;
-    }
-
-    .browser-frame {
-      background: var(--bg3);
-      border: 1px solid var(--border2);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
-    }
-
-    .browser-bar {
-      background: var(--bg2);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .browser-dots {
-      display: flex;
-      gap: 6px;
-    }
-
-    .browser-dots span {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--border2);
-    }
-
-    .browser-url {
-      flex: 1;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 5px 12px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-      text-align: center;
-    }
-
-    .browser-content {
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      min-height: 340px;
-    }
-
-    .browser-main {
-      padding: 28px;
-      border-right: 1px solid var(--border);
-    }
-
-    .search-results-mock {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .mock-result {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      animation: fadeUp 0.5s ease both;
-    }
-
-    .mock-result:nth-child(1) { animation-delay: 0.6s; }
-    .mock-result:nth-child(2) { animation-delay: 0.7s; }
-    .mock-result:nth-child(3) { animation-delay: 0.8s; }
-
-    .mock-url { font-size: 11px; color: var(--text3); font-family: var(--mono); }
-    .mock-title { font-size: 15px; color: #7ca5f7; text-decoration: underline; cursor: pointer; }
-    .mock-snippet { font-size: 12px; color: var(--text2); line-height: 1.5; }
-    .mock-snippet mark { background: rgba(124,106,247,0.2); color: var(--accent2); border-radius: 2px; padding: 0 2px; }
-
-    /* Mini panel inside browser */
-    .mini-panel {
-      background: #0e0e10;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .mp-header {
-      padding: 14px 14px 10px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .mp-logo {
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: 14px;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .mp-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .mp-label {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: var(--text3);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      padding: 10px 14px 6px;
-    }
-
-    .mp-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      padding: 0 10px;
-      flex: 1;
-    }
-
-    .mp-card {
-      background: #17171a;
-      border: 1px solid #1e1e24;
-      border-radius: 7px;
-      padding: 8px 10px;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .mp-card:nth-child(1) { animation-delay: 0.9s; }
-    .mp-card:nth-child(2) { animation-delay: 1.0s; }
-    .mp-card:nth-child(3) { animation-delay: 1.1s; }
-
-    .mp-card-title {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text);
-      line-height: 1.3;
-      margin-bottom: 3px;
-    }
-
-    .mp-card-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .mp-card-domain { font-family: var(--mono); font-size: 9px; color: var(--text3); }
-    .mp-card-score { font-family: var(--mono); font-size: 9px; color: var(--accent); background: var(--accent-dim); border-radius: 3px; padding: 1px 4px; }
-
     /* ── Sections ──────────────────────────────────────────────────── */
-    section {
-      padding: 100px 24px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
+    section { padding: 100px 24px; position: relative; z-index: 1; }
+    .container { max-width: 1100px; margin: 0 auto; }
 
     .section-label {
       font-family: var(--mono);
@@ -505,13 +297,7 @@
     }
 
     .section-title em { font-style: italic; color: var(--accent); }
-
-    .section-body {
-      font-size: 17px;
-      color: var(--text2);
-      max-width: 500px;
-      line-height: 1.75;
-    }
+    .section-body { font-size: 17px; color: var(--text2); max-width: 500px; line-height: 1.75; }
 
     /* ── How it works ──────────────────────────────────────────────── */
     .how-grid {
@@ -525,22 +311,10 @@
       overflow: hidden;
     }
 
-    .how-item {
-      background: var(--bg2);
-      padding: 36px 32px;
-      position: relative;
-      transition: background 0.2s;
-    }
-
+    .how-item { background: var(--bg2); padding: 36px 32px; transition: background 0.2s; }
     .how-item:hover { background: var(--bg3); }
 
-    .how-num {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-      margin-bottom: 20px;
-      letter-spacing: 0.05em;
-    }
+    .how-num { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 20px; letter-spacing: 0.05em; }
 
     .how-icon {
       width: 40px; height: 40px;
@@ -554,35 +328,12 @@
       font-size: 18px;
     }
 
-    .how-title {
-      font-family: var(--serif);
-      font-size: 22px;
-      font-weight: 400;
-      color: var(--text);
-      margin-bottom: 10px;
-      letter-spacing: -0.3px;
-    }
-
-    .how-desc {
-      font-size: 14px;
-      color: var(--text2);
-      line-height: 1.65;
-    }
+    .how-title { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--text); margin-bottom: 10px; letter-spacing: -0.3px; }
+    .how-desc { font-size: 14px; color: var(--text2); line-height: 1.65; }
 
     /* ── Features ──────────────────────────────────────────────────── */
-    .features-wrap {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      align-items: center;
-      margin-top: 64px;
-    }
-
-    .feature-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+    .features-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-top: 64px; }
+    .feature-list { display: flex; flex-direction: column; gap: 2px; }
 
     .feature-item {
       display: flex;
@@ -595,16 +346,8 @@
       border: 1px solid transparent;
     }
 
-    .feature-item:hover, .feature-item.active {
-      background: var(--bg3);
-      border-color: var(--border);
-    }
-
-    .feature-item.active .feature-icon {
-      background: var(--accent-dim);
-      border-color: rgba(124,106,247,0.3);
-      color: var(--accent);
-    }
+    .feature-item:hover, .feature-item.active { background: var(--bg3); border-color: var(--border); }
+    .feature-item.active .feature-icon { background: var(--accent-dim); border-color: rgba(124,106,247,0.3); color: var(--accent); }
 
     .feature-icon {
       width: 36px; height: 36px;
@@ -619,19 +362,8 @@
       transition: all 0.15s;
     }
 
-    .feature-text h3 {
-      font-family: var(--serif);
-      font-size: 17px;
-      font-weight: 400;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .feature-text p {
-      font-size: 13px;
-      color: var(--text2);
-      line-height: 1.55;
-    }
+    .feature-text h3 { font-family: var(--serif); font-size: 17px; font-weight: 400; color: var(--text); margin-bottom: 4px; }
+    .feature-text p { font-size: 13px; color: var(--text2); line-height: 1.55; }
 
     .feature-visual {
       background: var(--bg2);
@@ -655,7 +387,9 @@
       pointer-events: none;
     }
 
-    /* ── Privacy section ───────────────────────────────────────────── */
+    .mp-card { background: #17171a; border: 1px solid #1e1e24; border-radius: 7px; padding: 8px 10px; }
+
+    /* ── Privacy ───────────────────────────────────────────────────── */
     .privacy-wrap {
       background: var(--bg2);
       border: 1px solid var(--border2);
@@ -667,12 +401,7 @@
       align-items: center;
     }
 
-    .privacy-badges {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 32px;
-    }
+    .privacy-badges { display: flex; flex-direction: column; gap: 12px; margin-top: 32px; }
 
     .privacy-badge {
       display: flex;
@@ -697,12 +426,7 @@
       flex-shrink: 0;
     }
 
-    .privacy-graphic {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      align-items: center;
-    }
+    .privacy-graphic { display: flex; flex-direction: column; gap: 16px; align-items: center; }
 
     .device-icon {
       width: 80px; height: 80px;
@@ -729,12 +453,7 @@
       color: var(--green);
     }
 
-    .lock-items {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      width: 100%;
-    }
+    .lock-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
 
     .lock-item {
       background: var(--bg3);
@@ -748,62 +467,8 @@
 
     .lock-item span { display: block; font-size: 20px; margin-bottom: 6px; }
 
-    /* ── Testimonials / quotes ─────────────────────────────────────── */
-    .quotes-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 56px;
-    }
-
-    .quote-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 28px;
-      transition: border-color 0.2s;
-    }
-
-    .quote-card:hover { border-color: var(--border2); }
-
-    .quote-text {
-      font-family: var(--serif);
-      font-size: 17px;
-      font-weight: 300;
-      font-style: italic;
-      color: var(--text);
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-
-    .quote-author {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .quote-avatar {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: var(--accent-dim);
-      border: 1px solid rgba(124,106,247,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--accent);
-      font-family: var(--mono);
-    }
-
-    .quote-name { font-size: 13px; color: var(--text2); }
-    .quote-role { font-size: 11px; color: var(--text3); font-family: var(--mono); }
-
     /* ── CTA ───────────────────────────────────────────────────────── */
-    .cta-section {
-      text-align: center;
-      padding: 120px 24px;
-    }
+    .cta-section { text-align: center; padding: 120px 24px; }
 
     .cta-wrap {
       background: var(--bg2);
@@ -826,36 +491,10 @@
       pointer-events: none;
     }
 
-    .cta-title {
-      font-family: var(--serif);
-      font-size: clamp(36px, 5vw, 56px);
-      font-weight: 300;
-      letter-spacing: -1px;
-      line-height: 1.1;
-      color: var(--text);
-      margin-bottom: 16px;
-      position: relative;
-      z-index: 1;
-    }
-
+    .cta-title { font-family: var(--serif); font-size: clamp(36px, 5vw, 56px); font-weight: 300; letter-spacing: -1px; line-height: 1.1; color: var(--text); margin-bottom: 16px; position: relative; z-index: 1; }
     .cta-title em { font-style: italic; color: var(--accent); }
-
-    .cta-sub {
-      font-size: 17px;
-      color: var(--text2);
-      margin-bottom: 36px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .cta-actions {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      position: relative;
-      z-index: 1;
-    }
+    .cta-sub { font-size: 17px; color: var(--text2); margin-bottom: 36px; position: relative; z-index: 1; }
+    .cta-actions { display: flex; align-items: center; justify-content: center; gap: 16px; position: relative; z-index: 1; }
 
     /* ── Footer ────────────────────────────────────────────────────── */
     footer {
@@ -868,84 +507,36 @@
       z-index: 1;
     }
 
-    .footer-logo {
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: 18px;
-      color: var(--text2);
-    }
-
+    .footer-logo { font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--text2); }
     .footer-logo em { color: var(--accent); }
 
-    .footer-note {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .footer-note { font-family: var(--mono); font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; }
+    .footer-note span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
 
-    .footer-note span {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      list-style: none;
-    }
-
-    .footer-links a {
-      font-size: 13px;
-      color: var(--text3);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a { font-size: 13px; color: var(--text3); text-decoration: none; transition: color 0.15s; }
     .footer-links a:hover { color: var(--text2); }
 
-    /* ── Divider ───────────────────────────────────────────────────── */
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border2), transparent);
-      margin: 0 48px;
-    }
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); margin: 0 48px; }
 
-    /* ── Animations ────────────────────────────────────────────────── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* ── Scrollbar ─────────────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-    /* ── Responsive ────────────────────────────────────────────────── */
     @media (max-width: 768px) {
       nav { padding: 16px 24px; }
       .nav-links { display: none; }
       .how-grid { grid-template-columns: 1fr; }
       .features-wrap { grid-template-columns: 1fr; }
       .privacy-wrap { grid-template-columns: 1fr; padding: 40px 28px; gap: 40px; }
-      .quotes-grid { grid-template-columns: 1fr; }
-      .browser-content { grid-template-columns: 1fr; }
-      .mini-panel { display: none; }
       footer { flex-direction: column; gap: 20px; text-align: center; }
     }
   </style>
@@ -962,12 +553,12 @@
       <li><a href="#how">How it works</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#privacy">Privacy</a></li>
-      <li><a href="#" class="nav-cta">Add to Chrome</a></li>
+      <li><a href="REPLACE_WITH_CHROME_STORE_LINK" class="nav-cta" target="_blank">Add to Chrome</a></li>
     </ul>
     <button id="themeToggle" class="theme-toggle-btn" type="button">Light</button>
   </nav>
 
-  <!-- Hero -->
+  <!-- Hero — no browser mockup -->
   <section class="hero">
     <div class="hero-eyebrow">
       <span class="eyebrow-dot"></span>
@@ -985,77 +576,14 @@
     </p>
 
     <div class="hero-actions">
-      <a href="#" class="btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v8M8 12h8"/></svg>
+      <a href="REPLACE_WITH_CHROME_STORE_LINK" class="btn-primary" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
         Add to Chrome — it's free
       </a>
       <a href="#how" class="btn-secondary">See how it works →</a>
     </div>
 
     <p class="hero-note">Works on Chrome & Edge · No account needed · 100% private</p>
-
-    <!-- Browser mockup -->
-    <div class="hero-visual">
-      <div class="browser-frame">
-        <div class="browser-bar">
-          <div class="browser-dots">
-            <span></span><span></span><span></span>
-          </div>
-          <div class="browser-url">google.com/search?q=transformer+architecture+attention</div>
-        </div>
-        <div class="browser-content">
-          <div class="browser-main">
-            <div class="search-results-mock">
-              <div class="mock-result">
-                <div class="mock-url">arxiv.org › abs › 1706.03762</div>
-                <div class="mock-title">Attention Is All You Need</div>
-                <div class="mock-snippet">The dominant sequence transduction models are based on complex recurrent or convolutional neural networks... <mark>attention mechanisms</mark> allow modeling of dependencies...</div>
-              </div>
-              <div class="mock-result">
-                <div class="mock-url">jalammar.github.io › illustrated-transformer</div>
-                <div class="mock-title">The Illustrated Transformer — Jay Alammar</div>
-                <div class="mock-snippet">A visual walkthrough of the <mark>transformer architecture</mark>, encoder-decoder structure, and multi-head <mark>attention</mark>.</div>
-              </div>
-              <div class="mock-result">
-                <div class="mock-url">distill.pub › 2016 › augmented-rnns</div>
-                <div class="mock-title">Attention and Augmented Recurrent Neural Networks</div>
-                <div class="mock-snippet">Four directions for augmenting RNNs with <mark>attention</mark>: neural Turing machines, attentional interfaces...</div>
-              </div>
-            </div>
-          </div>
-          <div class="mini-panel">
-            <div class="mp-header">
-              <div class="mp-logo"><div class="mp-dot"></div>LocalMind</div>
-              <span style="font-family:monospace;font-size:10px;color:#555560;">✕</span>
-            </div>
-            <div class="mp-label">From your memory</div>
-            <div class="mp-cards">
-              <div class="mp-card">
-                <div class="mp-card-title">The Illustrated Transformer</div>
-                <div class="mp-card-meta">
-                  <span class="mp-card-domain">jalammar.github.io</span>
-                  <span class="mp-card-score">94%</span>
-                </div>
-              </div>
-              <div class="mp-card">
-                <div class="mp-card-title">Attention Is All You Need — Paper Notes</div>
-                <div class="mp-card-meta">
-                  <span class="mp-card-domain">notion.so</span>
-                  <span class="mp-card-score">88%</span>
-                </div>
-              </div>
-              <div class="mp-card">
-                <div class="mp-card-title">CS224N Lecture 8 — Self Attention</div>
-                <div class="mp-card-meta">
-                  <span class="mp-card-domain">web.stanford.edu</span>
-                  <span class="mp-card-score">81%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </section>
 
   <div class="divider"></div>
@@ -1068,7 +596,6 @@
         <h2 class="section-title">Three steps. Zero effort on your part.</h2>
         <p class="section-body">Local Mind runs silently in the background. You just browse normally — it does the rest.</p>
       </div>
-
       <div class="how-grid reveal">
         <div class="how-item">
           <div class="how-num">01 —</div>
@@ -1101,31 +628,30 @@
         <div class="section-label">Features</div>
         <h2 class="section-title">Built for how your brain <em>actually works.</em></h2>
       </div>
-
       <div class="features-wrap">
         <div class="feature-list reveal">
-          <div class="feature-item active" data-feature="search">
+          <div class="feature-item active">
             <div class="feature-icon">🔍</div>
             <div class="feature-text">
               <h3>Natural language search</h3>
               <p>Ask questions the way you think them. No need to remember exact titles or URLs.</p>
             </div>
           </div>
-          <div class="feature-item" data-feature="timeline">
+          <div class="feature-item">
             <div class="feature-icon">📅</div>
             <div class="feature-text">
               <h3>Memory timeline</h3>
               <p>A chronological view of everything you've read, grouped by day and searchable instantly.</p>
             </div>
           </div>
-          <div class="feature-item" data-feature="trigger">
+          <div class="feature-item">
             <div class="feature-icon">✨</div>
             <div class="feature-text">
               <h3>Search-aware panel</h3>
               <p>When you search Google, a mini panel shows relevant pages from your own memory alongside the results.</p>
             </div>
           </div>
-          <div class="feature-item" data-feature="private">
+          <div class="feature-item">
             <div class="feature-icon">🔒</div>
             <div class="feature-text">
               <h3>Delete anything, anytime</h3>
@@ -1133,11 +659,9 @@
             </div>
           </div>
         </div>
-
         <div class="feature-visual reveal">
-          <!-- Animated sidebar preview -->
           <div style="font-family:monospace;font-size:10px;color:#555560;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">Memory Timeline</div>
-          <div style="font-family:monospace;font-size:9px;color:#333340;margin-bottom:8px;">TODAY</div>
+          <div style="font-family:monospace;font-size:9px;color:#555560;margin-bottom:8px;">TODAY</div>
           <div class="mp-card" style="margin-bottom:6px;padding:10px 12px;">
             <div style="font-size:12px;font-weight:500;color:#e8e8ed;margin-bottom:4px;">Attention Is All You Need — Transformer Architecture</div>
             <div style="display:flex;justify-content:space-between;"><span style="font-family:monospace;font-size:10px;color:#555560;">arxiv.org</span><span style="font-size:10px;color:#888895;">2m ago</span></div>
@@ -1150,7 +674,7 @@
             <div style="font-size:12px;font-weight:500;color:#e8e8ed;margin-bottom:4px;">How to negotiate a salary offer</div>
             <div style="display:flex;justify-content:space-between;"><span style="font-family:monospace;font-size:10px;color:#555560;">hbr.org</span><span style="font-size:10px;color:#888895;">3h ago</span></div>
           </div>
-          <div style="font-family:monospace;font-size:9px;color:#333340;margin:10px 0 8px;">YESTERDAY</div>
+          <div style="font-family:monospace;font-size:9px;color:#555560;margin:10px 0 8px;">YESTERDAY</div>
           <div class="mp-card" style="padding:10px 12px;">
             <div style="font-size:12px;font-weight:500;color:#e8e8ed;margin-bottom:4px;">Understanding Diffusion Models — Lilian Weng</div>
             <div style="display:flex;justify-content:space-between;"><span style="font-family:monospace;font-size:10px;color:#555560;">lilianweng.github.io</span><span style="font-size:10px;color:#888895;">Yesterday</span></div>
@@ -1158,7 +682,6 @@
           <div style="margin-top:auto;padding-top:16px;border-top:1px solid #1e1e24;display:flex;align-items:center;gap:8px;">
             <div style="width:6px;height:6px;border-radius:50%;background:#4ade80;"></div>
             <span style="font-family:monospace;font-size:10px;color:#555560;">Private · On-device only</span>
-            <button style="margin-left:auto;background:transparent;border:1px solid #2a2a30;border-radius:5px;color:#555560;font-size:10px;padding:3px 8px;cursor:pointer;font-family:monospace;">Clear all</button>
           </div>
         </div>
       </div>
@@ -1176,91 +699,20 @@
           <h2 class="section-title" style="font-size:clamp(32px,4vw,48px);">Your browsing data stays on <em>your device.</em> Full stop.</h2>
           <p class="section-body" style="font-size:15px;margin-top:16px;">We built Local Mind with one rule: your data never leaves your machine. No servers, no syncing, no analytics on what you read. The AI model runs locally. The index lives in your browser's storage.</p>
           <div class="privacy-badges">
-            <div class="privacy-badge">
-              <div class="privacy-badge-icon">🏠</div>
-              Everything stored in your browser's local storage
-            </div>
-            <div class="privacy-badge">
-              <div class="privacy-badge-icon">🚫</div>
-              No account, no sign-up, no email required
-            </div>
-            <div class="privacy-badge">
-              <div class="privacy-badge-icon">🔐</div>
-              AI model runs entirely on your device
-            </div>
-            <div class="privacy-badge">
-              <div class="privacy-badge-icon">👁</div>
-              Open source — read every line of code
-            </div>
+            <div class="privacy-badge"><div class="privacy-badge-icon">🏠</div>Everything stored in your browser's local storage</div>
+            <div class="privacy-badge"><div class="privacy-badge-icon">🚫</div>No account, no sign-up, no email required</div>
+            <div class="privacy-badge"><div class="privacy-badge-icon">🔐</div>AI model runs entirely on your device</div>
+            <div class="privacy-badge"><div class="privacy-badge-icon">👁</div>Open source — read every line of code</div>
           </div>
         </div>
         <div class="privacy-graphic">
           <div class="device-icon">💻</div>
-          <div class="no-cloud">
-            <span>✓</span>
-            Never touches the cloud
-          </div>
+          <div class="no-cloud"><span>✓</span>Never touches the cloud</div>
           <div class="lock-items">
-            <div class="lock-item">
-              <span>🔒</span>
-              Encrypted storage
-            </div>
-            <div class="lock-item">
-              <span>📵</span>
-              No network calls
-            </div>
-            <div class="lock-item">
-              <span>🗑</span>
-              Delete anytime
-            </div>
-            <div class="lock-item">
-              <span>👤</span>
-              No tracking
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- Quotes -->
-  <section>
-    <div class="container">
-      <div class="reveal">
-        <div class="section-label">What people are saying</div>
-        <h2 class="section-title">Built for curious people who <em>read a lot.</em></h2>
-      </div>
-      <div class="quotes-grid reveal">
-        <div class="quote-card">
-          <p class="quote-text">"I used to lose half my research because I couldn't remember where I read something. Local Mind is the first tool that actually solves this."</p>
-          <div class="quote-author">
-            <div class="quote-avatar">AK</div>
-            <div>
-              <div class="quote-name">Arjun K.</div>
-              <div class="quote-role">ML Researcher</div>
-            </div>
-          </div>
-        </div>
-        <div class="quote-card">
-          <p class="quote-text">"The fact that nothing leaves my device is what convinced me to try it. Most AI tools want your data. This one doesn't."</p>
-          <div class="quote-author">
-            <div class="quote-avatar">SM</div>
-            <div>
-              <div class="quote-name">Sara M.</div>
-              <div class="quote-role">Privacy Engineer</div>
-            </div>
-          </div>
-        </div>
-        <div class="quote-card">
-          <p class="quote-text">"It's like having a second brain that was actually paying attention while I was browsing. Searches feel like talking to someone who read everything with me."</p>
-          <div class="quote-author">
-            <div class="quote-avatar">RV</div>
-            <div>
-              <div class="quote-name">Rohan V.</div>
-              <div class="quote-role">Product Designer</div>
-            </div>
+            <div class="lock-item"><span>🔒</span>Encrypted storage</div>
+            <div class="lock-item"><span>📵</span>No network calls</div>
+            <div class="lock-item"><span>🗑</span>Delete anytime</div>
+            <div class="lock-item"><span>👤</span>No tracking</div>
           </div>
         </div>
       </div>
@@ -1273,10 +725,8 @@
       <h2 class="cta-title">Start remembering<br><em>everything</em> you read.</h2>
       <p class="cta-sub">Free forever. No account. Works in 30 seconds.</p>
       <div class="cta-actions">
-        <a href="#" class="btn-primary">
-          Add to Chrome — free
-        </a>
-        <a href="https://github.com" class="btn-secondary">View on GitHub →</a>
+        <a href="REPLACE_WITH_CHROME_STORE_LINK" class="btn-primary" target="_blank">Add to Chrome — free</a>
+        <a href="https://github.com/ziomega/localmind" class="btn-secondary" target="_blank">View on GitHub →</a>
       </div>
     </div>
   </section>
@@ -1284,14 +734,11 @@
   <!-- Footer -->
   <footer>
     <div class="footer-logo">Local<em>Mind</em></div>
-    <div class="footer-note">
-      <span></span>
-      All data stays on your device
-    </div>
+    <div class="footer-note"><span></span>All data stays on your device</div>
     <ul class="footer-links">
-      <li><a href="#">GitHub</a></li>
-      <li><a href="#">Privacy</a></li>
-      <li><a href="#">Docs</a></li>
+      <li><a href="https://github.com/ziomega/localmind" target="_blank">GitHub</a></li>
+      <li><a href="#privacy">Privacy</a></li>
+      <li><a href="#how">Docs</a></li>
     </ul>
   </footer>
 
@@ -1306,32 +753,22 @@
 
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
-      const themeToggle = document.getElementById('themeToggle');
-      if (themeToggle) {
-        themeToggle.textContent = theme === 'dark' ? 'Light' : 'Dark';
-      }
+      const btn = document.getElementById('themeToggle');
+      if (btn) btn.textContent = theme === 'dark' ? 'Light' : 'Dark';
     }
 
     applyTheme(getInitialTheme());
 
-    // Nav scroll effect
     const nav = document.getElementById('nav');
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 40);
+    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
     });
 
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-        const next = current === 'dark' ? 'light' : 'dark';
-        localStorage.setItem(THEME_KEY, next);
-        applyTheme(next);
-      });
-    }
-
-    // Scroll reveal
-    const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
@@ -1340,9 +777,8 @@
         }
       });
     }, { threshold: 0.1 });
-    reveals.forEach(el => observer.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // Feature tabs
     document.querySelectorAll('.feature-item').forEach(item => {
       item.addEventListener('click', () => {
         document.querySelectorAll('.feature-item').forEach(i => i.classList.remove('active'));
