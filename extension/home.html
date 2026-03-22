@@ -386,86 +386,7 @@
       background: radial-gradient(circle, rgba(124,106,247,0.08) 0%, transparent 70%);
       pointer-events: none;
     }
-
     .mp-card { background: #17171a; border: 1px solid #1e1e24; border-radius: 7px; padding: 8px 10px; }
-
-    /* ── Privacy ───────────────────────────────────────────────────── */
-    .privacy-wrap {
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      border-radius: 24px;
-      padding: 64px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
-    }
-
-    .privacy-badges { display: flex; flex-direction: column; gap: 12px; margin-top: 32px; }
-
-    .privacy-badge {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 14px;
-      color: var(--text2);
-    }
-
-    .privacy-badge-icon {
-      width: 28px; height: 28px;
-      background: var(--accent-dim);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-
-    .privacy-graphic { display: flex; flex-direction: column; gap: 16px; align-items: center; }
-
-    .device-icon {
-      width: 80px; height: 80px;
-      background: var(--accent-dim);
-      border: 2px solid rgba(124,106,247,0.3);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-      margin: 0 auto 8px;
-    }
-
-    .no-cloud {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 20px;
-      background: rgba(74,222,128,0.08);
-      border: 1px solid rgba(74,222,128,0.2);
-      border-radius: 999px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--green);
-    }
-
-    .lock-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-
-    .lock-item {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text2);
-    }
-
-    .lock-item span { display: block; font-size: 20px; margin-bottom: 6px; }
 
     /* ── CTA ───────────────────────────────────────────────────────── */
     .cta-section { text-align: center; padding: 120px 24px; }
@@ -679,7 +600,6 @@
       .nav-links { display: none; }
       .how-grid { grid-template-columns: 1fr; }
       .features-wrap { grid-template-columns: 1fr; }
-      .privacy-wrap { grid-template-columns: 1fr; padding: 40px 28px; gap: 40px; }
       .install-step { grid-template-columns: 48px 1fr; }
       footer { flex-direction: column; gap: 20px; text-align: center; }
     }
@@ -697,7 +617,6 @@
       <li><a href="#how">How it works</a></li>
       <li><a href="#install">Install</a></li>
       <li><a href="#features">Features</a></li>
-      <li><a href="#privacy">Privacy</a></li>
       <li><a href="https://github.com/ziomega/localmind/releases/download/v1.0.0-beta/local-mind-extension.zip" class="nav-cta" target="_blank">Download for Chrome</a></li>
     </ul>
     <button id="themeToggle" class="theme-toggle-btn" type="button">Light</button>
@@ -717,7 +636,7 @@
     </h1>
 
     <p class="hero-sub">
-      Local Mind quietly learns from everything you read. Search your entire browsing history in plain English — privately, instantly, on your own device.
+      Local Mind quietly learns from everything you read. Search your entire browsing history in plain English — instantly, on your own device.
     </p>
 
     <div class="hero-actions">
@@ -728,7 +647,7 @@
       <a href="#how" class="btn-secondary">See how it works →</a>
     </div>
 
-    <p class="hero-note">Works on Chrome & Edge · No account needed · 100% private</p>
+    <p class="hero-note">Works on Chrome & Edge · No account needed </p>
   </section>
 
   <div class="divider"></div>
@@ -924,34 +843,6 @@
 
   <div class="divider"></div>
 
-  <!-- Privacy -->
-  <section id="privacy">
-    <div class="container">
-      <div class="privacy-wrap reveal">
-        <div>
-          <div class="section-label">Privacy first</div>
-          <h2 class="section-title" style="font-size:clamp(32px,4vw,48px);">Your browsing data stays on <em>your device.</em> Full stop.</h2>
-          <p class="section-body" style="font-size:15px;margin-top:16px;">We built Local Mind with one rule: your data never leaves your machine. No servers, no syncing, no analytics on what you read. The AI model runs locally. The index lives in your browser's storage.</p>
-          <div class="privacy-badges">
-            <div class="privacy-badge"><div class="privacy-badge-icon">🏠</div>Everything stored in your browser's local storage</div>
-            <div class="privacy-badge"><div class="privacy-badge-icon">🚫</div>No account, no sign-up, no email required</div>
-            <div class="privacy-badge"><div class="privacy-badge-icon">🔐</div>AI model runs entirely on your device</div>
-            <div class="privacy-badge"><div class="privacy-badge-icon">👁</div>Open source — read every line of code</div>
-          </div>
-        </div>
-        <div class="privacy-graphic">
-          <div class="device-icon">💻</div>
-          <div class="no-cloud"><span>✓</span>Never touches the cloud</div>
-          <div class="lock-items">
-            <div class="lock-item"><span>🔒</span>Encrypted storage</div>
-            <div class="lock-item"><span>📵</span>No network calls</div>
-            <div class="lock-item"><span>🗑</span>Delete anytime</div>
-            <div class="lock-item"><span>👤</span>No tracking</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- CTA -->
   <section class="cta-section">
@@ -970,10 +861,9 @@
   <!-- Footer -->
   <footer>
     <div class="footer-logo">Local<em>Mind</em></div>
-    <div class="footer-note"><span></span>All data stays on your device</div>
+    <div class="footer-note"><span></span>Your Personal Memory Genie</div>
     <ul class="footer-links">
       <li><a href="https://github.com/ziomega/localmind" target="_blank">GitHub</a></li>
-      <li><a href="#privacy">Privacy</a></li>
       <li><a href="#install">Install</a></li>
     </ul>
   </footer>
