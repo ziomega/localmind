@@ -4,7 +4,7 @@
 Privacy-first browser memory assistant that helps you semantically search what you have read.
 <!-- Replace with your hosted banner image URL
 ![LocalMind Banner](./Screenshots/banner.png) -->
-
+https://localmind-beta.vercel.app/
 
 ## Screenshots
 
