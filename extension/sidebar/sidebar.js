@@ -24,6 +24,8 @@ const queryAnswer = document.getElementById('queryAnswer');
 
 let searchTimeout = null;
 let activeDropdown = null;
+/** True only when the current search text came from GET_PENDING_QUERY (SERP auto-fill). */
+let searchFromAutoSerp = false;
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 
@@ -126,6 +128,7 @@ async function loadTimeline() {
 // ── Search ────────────────────────────────────────────────────────────────────
 
 searchInput.addEventListener('input', () => {
+  searchFromAutoSerp = false;
   clearTimeout(searchTimeout);
   const q = searchInput.value.trim();
   if (!q) { showTimeline(); return; }
@@ -233,6 +236,7 @@ function scheduleSidebarRefresh() {
 
 clearBtn.addEventListener('click', () => {
   searchInput.value = '';
+  searchFromAutoSerp = false;
   setSourceFilter('all');
   showTimeline();
 });
@@ -249,6 +253,7 @@ function showTimeline() {
 
 document.querySelectorAll('.eq-chip').forEach(btn => {
   btn.addEventListener('click', () => {
+    searchFromAutoSerp = false;
     searchInput.value = btn.dataset.q;
     searchInput.focus();
     runSearch(btn.dataset.q);
@@ -614,10 +619,38 @@ document.getElementById('clearMemoryBtn').addEventListener('click', () => {
 async function checkForPendingQuery() {
   const response = await bgMessage({ type: 'GET_PENDING_QUERY' });
   if (response?.query) {
+    searchFromAutoSerp = true;
     searchInput.value = response.query;
     runSearch(response.query);
   }
 }
+
+function resetAutoSerpSearchUi() {
+  searchInput.value = '';
+  searchFromAutoSerp = false;
+  queryAnswer.classList.add('hidden');
+  setSourceFilter('all');
+  showTimeline();
+}
+
+async function syncSearchUiIfLeftSerp() {
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const url = tabs[0]?.url;
+  if (!url) return;
+  const r = await bgMessage({ type: 'EXTRACT_SEARCH_QUERY_FROM_URL', url });
+  if (r?.query || !searchFromAutoSerp) return;
+  resetAutoSerpSearchUi();
+}
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (!tab.active || !tab.url) return;
+  if (changeInfo.status !== 'complete') return;
+  syncSearchUiIfLeftSerp();
+});
+
+chrome.tabs.onActivated.addListener(() => {
+  syncSearchUiIfLeftSerp();
+});
 
 // ── Auto-refresh on new browser search ───────────────────────────────────────
 

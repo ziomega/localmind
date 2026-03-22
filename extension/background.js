@@ -47,6 +47,10 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       path: 'sidebar/sidebar.html',
       enabled: true,
     });
+    const { pendingTabId } = await chrome.storage.session.get('pendingTabId');
+    if (pendingTabId === tabId) {
+      await chrome.storage.session.remove(['pendingQuery', 'pendingTabId']);
+    }
   }
 });
 
@@ -96,13 +100,22 @@ async function handleMessage(message, sender) {
     case 'GET_RECENT':
       return { pages: await getRecentPages(message.limit || 20) };
 
+    case 'EXTRACT_SEARCH_QUERY_FROM_URL':
+      return { query: extractSearchQuery(message.url) };
+
     case 'GET_PENDING_QUERY': {
-    const data = await chrome.storage.session.get(['pendingQuery', 'pendingTabId']);
-    if (data.pendingQuery) {
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const activeUrl = tabs[0]?.url;
+      if (activeUrl && !extractSearchQuery(activeUrl)) {
+        await chrome.storage.session.remove(['pendingQuery', 'pendingTabId']);
+        return { query: null };
+      }
+      const data = await chrome.storage.session.get(['pendingQuery', 'pendingTabId']);
+      if (data.pendingQuery) {
         await chrome.storage.session.remove(['pendingQuery', 'pendingTabId']);
         return { query: data.pendingQuery };
-    }
-    return { query: null };
+      }
+      return { query: null };
     }
 
     case 'CLEAR_MEMORY': {
