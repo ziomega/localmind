@@ -22,15 +22,11 @@
     "http://localhost/*"
   ],
 
-  "chrome_url_overrides": {
-    "newtab": "dashboard.html"
-  },
-
   "commands": {
     "open-sidebar": {
       "suggested_key": {
-        "default": "Ctrl+Shift+M",
-        "mac": "Command+Shift+M"
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
       },
       "description": "Open Local Mind memory sidebar"
     }

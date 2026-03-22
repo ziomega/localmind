@@ -162,9 +162,35 @@ async function indexPage({ url, title, text, timestamp }) {
   if (!url) return;
   const key = urlToKey(url);
   const existing = await chrome.storage.local.get(key);
-  if (existing[key]) {
-    const age = Date.now() - existing[key].timestamp;
-    if (age < 24 * 60 * 60 * 1000) return;
+  const existingRecord = existing[key];
+  const trimmedText = text.slice(0, 500);
+
+  // Revisits should refresh metadata/timestamp; only regenerate vectors when content changes.
+  if (existingRecord) {
+    const hasContentChanged = (existingRecord.text || '') !== trimmedText;
+    let embedding = existingRecord.embedding || null;
+
+    if (hasContentChanged) {
+      console.log('[LocalMind] Re-indexing changed page:', title);
+      embedding = await generateEmbedding(text, {
+        taskType: 'RETRIEVAL_DOCUMENT',
+        title: title || undefined,
+      });
+    }
+
+    await savePageToMemory({
+      ...existingRecord,
+      url,
+      title,
+      text: trimmedText,
+      embedding,
+      timestamp,
+      domain: new URL(url).hostname,
+      sourceType: 'website',
+      category: 'Visited Website',
+      fromHistory: false,
+    });
+    return;
   }
 
   console.log('[LocalMind] Indexing:', title);
@@ -174,8 +200,9 @@ async function indexPage({ url, title, text, timestamp }) {
   });
 
   await savePageToMemory({
-    url, title,
-    text: text.slice(0, 500),
+    url,
+    title,
+    text: trimmedText,
     embedding,
     timestamp,
     domain: new URL(url).hostname,
